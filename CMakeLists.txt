@@ -61,22 +61,16 @@ FetchContent_MakeAvailable(fmt)
 
 add_executable(${PROJECT_NAME})
 
+
+add_subdirectory(App)
+
+add_subdirectory(Utils)
+
+# add_subdirectory(Renderer)
+
 target_sources(${PROJECT_NAME} 
     PRIVATE 
-        main.cpp 
-        utils.cpp 
-        utils.hpp
-        ${imgui_SOURCE_DIR}/imgui_draw.cpp
-        ${imgui_SOURCE_DIR}/imgui_internal.h
-        ${imgui_SOURCE_DIR}/imgui_tables.cpp
-        ${imgui_SOURCE_DIR}/imgui_widgets.cpp
-        ${imgui_SOURCE_DIR}/imgui.cpp
-        ${imgui_SOURCE_DIR}/imgui.h
-        ${imgui_SOURCE_DIR}/imgui_demo.cpp
-        ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
-        ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.h
-        ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
-        ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.h
+        main.cpp
 )
 
 target_compile_options(
@@ -86,10 +80,6 @@ target_compile_options(
     -Wextra 
     -Wuninitialized
 )
-
-target_include_directories(${PROJECT_NAME} PRIVATE ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE GL glfw GLEW fmt)
 
 
 message(STATUS "Available variables:")
