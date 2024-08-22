@@ -35,9 +35,49 @@ message("Fetching GLEW...")
 
 FetchContent_MakeAvailable(GLEW)
 
+# Fetch DearImGui
+FetchContent_Declare(
+    imgui
+    GIT_REPOSITORY https://github.com/ocornut/imgui.git
+    GIT_TAG v1.91.0-docking
+    GIT_SHALLOW TRUE
+)
+
+message("Fetching Dear ImGui...")
+
+FetchContent_MakeAvailable(imgui)
+
+# Fetch fmt
+FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 11.0.2
+    GIT_SHALLOW TRUE       
+)
+
+message("Fetching fmt...")
+
+FetchContent_MakeAvailable(fmt)
+
 add_executable(${PROJECT_NAME})
 
-target_sources(${PROJECT_NAME} PRIVATE main.cpp)
+target_sources(${PROJECT_NAME} 
+    PRIVATE 
+        main.cpp 
+        utils.cpp 
+        utils.hpp
+        ${imgui_SOURCE_DIR}/imgui_draw.cpp
+        ${imgui_SOURCE_DIR}/imgui_internal.h
+        ${imgui_SOURCE_DIR}/imgui_tables.cpp
+        ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+        ${imgui_SOURCE_DIR}/imgui.cpp
+        ${imgui_SOURCE_DIR}/imgui.h
+        ${imgui_SOURCE_DIR}/imgui_demo.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.h
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.h
+)
 
 target_compile_options(
     ${PROJECT_NAME} PRIVATE
@@ -47,5 +87,13 @@ target_compile_options(
     -Wuninitialized
 )
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw GLEW)
+target_link_libraries(${PROJECT_NAME} PRIVATE GL glfw GLEW fmt)
+
+
+message(STATUS "Available variables:")
+get_cmake_property(_variableNames VARIABLES)
+foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName} = ${${_variableName}}")
+endforeach()
