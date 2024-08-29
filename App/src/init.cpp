@@ -6,6 +6,42 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include <vector>
+#include "Shader.hpp"
+#include "Vertex.hpp"
+
+
+auto setup_triangle_data() -> std::pair<GLuint, GLuint> {
+
+    GLuint vao{};
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    
+    GLuint vbo {};
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    std::vector<Vertex> triangle {
+        {-0.5f, -0.5f, 0.0f},
+        {0.5f, -0.5f, 0.0f},
+        {0.0f, 0.5f, 0.0f},    
+    };
+
+    fmt::print("sizeof triangle {}\ntriangel[0].size() {}\nsizeof Vertex {}", sizeof(triangle), triangle[0].size(), sizeof(Vertex));
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * triangle.size(), triangle.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, triangle[0].size(), GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    return {vao, vbo};
+}
+
+auto draw_triangle(GLuint vao, const Shader& shader) -> void {   
+   shader.useShader();
+   glBindVertexArray(vao);
+   glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
 
 auto init() noexcept -> bool {
     if (!glfwInit()) {
@@ -17,7 +53,10 @@ auto init() noexcept -> bool {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow*  window { glfwCreateWindow(640, 480, "3D Editor", nullptr, nullptr) };
+    static constexpr int window_width {1920};
+    static constexpr int window_height {1080};
+
+    GLFWwindow*  window { glfwCreateWindow(window_width, window_height, "3D Editor", nullptr, nullptr) };
     
     if (!window)
     {
@@ -47,9 +86,16 @@ auto init() noexcept -> bool {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
 
-    glViewport(0, 0, 640, 480);
+    glViewport(0, 0, window_width, window_height);
     glfwSetFramebufferSizeCallback(window, windowFramebufferSizeCallback);
     
+    auto [vao, vbo] { setup_triangle_data() };
+
+    Shader triangle_shader {
+        std::filesystem::current_path() / "App"  / "assets" / "shaders" / "test_vertex.glsl",
+        std::filesystem::current_path() / "App" / "assets" / "shaders" / "test_fragment.glsl"
+    };
+
     bool visible {false};
    
     while (!glfwWindowShouldClose(window)) {
@@ -70,8 +116,10 @@ auto init() noexcept -> bool {
         else
             ImGui::Text("Not Clicked!");
 
-        glClearColor(1, 0.5, 0.2, 1);
+        glClearColor(0.902, 0.878, 0.796, 1);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        draw_triangle(vao, triangle_shader);
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
