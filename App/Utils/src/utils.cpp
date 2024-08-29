@@ -27,13 +27,40 @@ auto initLog() noexcept -> void {
     fmt::print(fg(fmt::color::yellow), "Maximum nr of vertex attributes supported: {}\n", nrAttributes);
 }
 
+
+
+
+auto shaderStatusLogger(GLuint shader) -> void {
+    char log[512];
+    int STATUS_OK {0};
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &STATUS_OK);
+
+    if (!STATUS_OK)
+    {
+        glGetShaderInfoLog(shader, 512, nullptr, log);
+        fmt::print(fg(fmt::color::red), "Shader: {}\nShader compilation failed!\nLOG: {}", shader, log);
+    }
+}
+
+
+auto programStatusLogger(GLuint program) -> void {
+    char log[512];
+    int STATUS_OK {0};
+    glGetProgramiv(program, GL_LINK_STATUS, &STATUS_OK);
+
+    if (!STATUS_OK)
+    {
+        glGetProgramInfoLog(program, 512, nullptr, log);
+        fmt::print(fg(fmt::color::red), "Program: {}\nProgram linking failed!\nLOG: {}", program, log);
+    }
+}
+
 auto proccessInput(GLFWwindow *window) noexcept -> void {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
 }
 
-auto windowFramebufferSizeCallback(GLFWwindow *window, int width, int height) -> void
-{
+auto windowFramebufferSizeCallback(GLFWwindow *window, int width, int height) -> void {
     glViewport(0, 0, width, height);
 }

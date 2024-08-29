@@ -1,6 +1,4 @@
-add_library(App STATIC)
-
-target_sources(App PRIVATE
+target_sources(${PROJECT_NAME} PRIVATE
         src/init.cpp
         inc/init.hpp
         ${imgui_SOURCE_DIR}/imgui_draw.cpp
@@ -16,18 +14,10 @@ target_sources(App PRIVATE
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.h
 )
 
-target_compile_options(
-    App PRIVATE
-    -std=c++23
-    -Wall 
-    -Wextra 
-    -Wuninitialized
-)
+target_include_directories(${PROJECT_NAME} PRIVATE ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends inc)
 
-target_include_directories(App PRIVATE ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends inc)
+target_include_directories(${PROJECT_NAME} PRIVATE inc)
 
-target_include_directories(App INTERFACE inc)
+add_subdirectory(Utils)
 
-target_link_libraries(App PRIVATE GL glfw GLEW fmt Utils)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE App)
+add_subdirectory(Renderer)

@@ -1,13 +1,13 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef _UTILS_HPP_
+#define _UTILS_HPP_
 
 #include <GLFW/glfw3.h>
 
 auto initLog() noexcept -> void;
 
-// void shaderStatusLogger(GLuint shader);
+auto shaderStatusLogger(GLuint shader) -> void;
 
-// void programStatusLogger(GLuint program);
+auto programStatusLogger(GLuint program) -> void;
 
 auto proccessInput(GLFWwindow* window) noexcept -> void;
 

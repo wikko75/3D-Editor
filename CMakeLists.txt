@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 project(
     3D_Editor
     VERSION 1.0 
@@ -61,12 +64,7 @@ FetchContent_MakeAvailable(fmt)
 
 add_executable(${PROJECT_NAME})
 
-
 add_subdirectory(App)
-
-add_subdirectory(Utils)
-
-# add_subdirectory(Renderer)
 
 target_sources(${PROJECT_NAME} 
     PRIVATE 
@@ -81,9 +79,10 @@ target_compile_options(
     -Wuninitialized
 )
 
+target_link_libraries(${PROJECT_NAME} PRIVATE GL glfw GLEW fmt)
 
-message(STATUS "Available variables:")
-get_cmake_property(_variableNames VARIABLES)
-foreach (_variableName ${_variableNames})
-    message(STATUS "${_variableName} = ${${_variableName}}")
-endforeach()
+# message(STATUS "Available variables:")
+# get_cmake_property(_variableNames VARIABLES)
+# foreach (_variableName ${_variableNames})
+#     message(STATUS "${_variableName} = ${${_variableName}}")
+# endforeach()

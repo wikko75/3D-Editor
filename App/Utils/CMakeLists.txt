@@ -16,3 +16,5 @@ target_compile_options(
 target_link_libraries(Utils PRIVATE GL glfw fmt GLEW)
 
 target_include_directories(Utils PUBLIC inc)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE Utils)
