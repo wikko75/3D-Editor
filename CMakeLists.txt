@@ -38,6 +38,17 @@ message("Fetching GLEW...")
 
 FetchContent_MakeAvailable(GLEW)
 
+FetchContent_Declare(
+	glm
+	GIT_REPOSITORY	https://github.com/g-truc/glm.git
+	GIT_TAG 	1.0.0  
+    GIT_SHALLOW TRUE
+)
+
+message("Fetching GLM...")
+
+FetchContent_MakeAvailable(glm)
+
 # Fetch DearImGui
 FetchContent_Declare(
     imgui
@@ -79,7 +90,7 @@ target_compile_options(
     -Wuninitialized
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE GL glfw GLEW fmt)
+target_link_libraries(${PROJECT_NAME} PRIVATE GL glfw GLEW glm::glm fmt)
 
 # message(STATUS "Available variables:")
 # get_cmake_property(_variableNames VARIABLES)
