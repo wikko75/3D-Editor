@@ -1,14 +1,12 @@
 #include "init.hpp"
 
 int main() {
-    init();
+    initApp();
 }
 
 
 
 //TODO
 // - abstraction
-// - shader class
 // - Vertex class
 // - Actor? class
-// 

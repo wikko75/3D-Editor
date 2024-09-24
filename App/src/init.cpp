@@ -1,6 +1,4 @@
 #include "init.hpp"
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <fmt/color.h>
 #include "utils.hpp"
 #include "imgui.h"
@@ -9,6 +7,10 @@
 #include <vector>
 #include "Shader.hpp"
 #include "Vertex.hpp"
+#include "Camera.hpp"
+#include "glm/glm.hpp"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 
 auto setup_triangle_data() -> std::pair<GLuint, GLuint> {
@@ -27,8 +29,6 @@ auto setup_triangle_data() -> std::pair<GLuint, GLuint> {
         {0.0f, 0.5f, 0.0f},    
     };
 
-    fmt::print("sizeof triangle {}\ntriangel[0].size() {}\nsizeof Vertex {}", sizeof(triangle), triangle[0].size(), sizeof(Vertex));
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * triangle.size(), triangle.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, triangle[0].size(), GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -36,14 +36,14 @@ auto setup_triangle_data() -> std::pair<GLuint, GLuint> {
     return {vao, vbo};
 }
 
-auto draw_triangle(GLuint vao, const Shader& shader) -> void {   
+auto render_triangle(GLuint vao, const Shader& shader) -> void {   
    shader.useShader();
    glBindVertexArray(vao);
    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 
-auto init() noexcept -> bool {
+auto initApp() noexcept -> bool {
     if (!glfwInit()) {
         fmt::print(fg(fmt::color::red), "Failed to initialize GLFW!\n");
         return -1;
@@ -53,13 +53,12 @@ auto init() noexcept -> bool {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    static constexpr int window_width {1920};
-    static constexpr int window_height {1080};
+    static constexpr int window_width {1920 / 2};
+    static constexpr int window_height {1080 / 2};
 
-    GLFWwindow*  window { glfwCreateWindow(window_width, window_height, "3D Editor", nullptr, nullptr) };
+    GLFWwindow* window { glfwCreateWindow(window_width, window_height, "3D Editor", nullptr, nullptr) };
     
-    if (!window)
-    {
+    if (!window) {
        fmt::print(fg(fmt::color::red), "Failed to initialize window!\n");
        return -1;
     }
@@ -73,18 +72,13 @@ auto init() noexcept -> bool {
 
     initLog();
 
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+    // all callbacks have to be register before ImGui initialization !!!
+    Camera main_camera {window, window_width, window_height, 0.0f, -90.0f, 0.5f, 10.f, {0.0f, 0.0f, 3.0f}};
 
-    // Setup Platform/Renderer backends
-    // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init();
+    if(!initImGui(window)) {
+       fmt::print(fg(fmt::color::red), "Failed to initialize Dear ImGui!\n");
+       return -1;
+    }
 
     glViewport(0, 0, window_width, window_height);
     glfwSetFramebufferSizeCallback(window, windowFramebufferSizeCallback);
@@ -96,30 +90,45 @@ auto init() noexcept -> bool {
         std::filesystem::current_path() / "App" / "assets" / "shaders" / "test_fragment.glsl"
     };
 
-    bool visible {false};
-   
+    glm::mat4 model_mtx { 1.f };
+    glm::mat4 view_mtx {};
+    glm::mat4 projection_mtx {};
+
+    double prev_frame {glfwGetTime()};
+    double curr_frame {};
+    double delta_time {};
+    
     while (!glfwWindowShouldClose(window)) {
+        curr_frame = glfwGetTime();
+        delta_time = curr_frame - prev_frame;
+        prev_frame = curr_frame;
+
         glfwPollEvents();
         proccessInput(window);
+
+        main_camera.updatePosition(static_cast<float>(delta_time));
+        main_camera.cameraLog();
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         ImGui::ShowDemoWindow(); // Show demo window! :)
         
-        if(ImGui::Button("Test Button")) {
-            visible =! visible;
-
-        }
-        if (visible) 
-            ImGui::Text("Clicked!");
-        else
-            ImGui::Text("Not Clicked!");
 
         glClearColor(0.902, 0.878, 0.796, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        draw_triangle(vao, triangle_shader);
+        view_mtx = glm::lookAt(main_camera.getPosition(), main_camera.getPosition() + main_camera.getDirection(), { 0.0f, 1.0f, 0.0f });
+        projection_mtx = glm::perspective(glm::radians(90.f), (float)window_width / window_height, 0.1f, 100.f);
+
+        model_mtx = glm::mat4(1.0f);
+        model_mtx = glm::translate(model_mtx, {0.0f, 0.0f, 0.f});
+
+        triangle_shader.setUniformMatrix4f("model_mtx", GL_FALSE, glm::value_ptr(model_mtx));
+        triangle_shader.setUniformMatrix4f("view_mtx", GL_FALSE, glm::value_ptr(view_mtx));
+        triangle_shader.setUniformMatrix4f("projection_mtx", GL_FALSE, glm::value_ptr(projection_mtx));
+
+        render_triangle(vao, triangle_shader);
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -133,4 +142,25 @@ auto init() noexcept -> bool {
     glfwTerminate();
 
     return 0;
+}
+
+auto initImGui(GLFWwindow *window) noexcept -> bool
+{
+    if (!window)
+        return false;
+    
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+
+    // Setup Platform/Renderer backends
+    // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init();
+
+    return true;
 }
