@@ -1,5 +1,8 @@
 #include "init.hpp"
 #include <fmt/color.h>
+#include "glm/glm.hpp"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "utils.hpp"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -8,20 +11,22 @@
 #include "Shader.hpp"
 #include "Vertex.hpp"
 #include "Camera.hpp"
-#include "glm/glm.hpp"
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "VertexArray.hpp"
+#include "VertexBuffer.hpp"
 
 
-auto setup_triangle_data() -> std::pair<GLuint, GLuint> {
 
-    GLuint vao{};
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+auto setup_triangle_data() -> std::pair<VertexArray, VertexBuffer> {
+
+    // GLuint vao{};
+    // glGenVertexArrays(1, &vao);
+    // glBindVertexArray(vao);
     
-    GLuint vbo {};
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    // GLuint vbo {};
+    // glGenBuffers(1, &vbo);
+    // glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    VertexArray vao;
 
     std::vector<Vertex> triangle {
         {-0.5f, -0.5f, 0.0f},
@@ -29,16 +34,19 @@ auto setup_triangle_data() -> std::pair<GLuint, GLuint> {
         {0.0f, 0.5f, 0.0f},    
     };
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * triangle.size(), triangle.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, triangle[0].size(), GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    VertexBuffer vbo {triangle, 0};
+
+    vao.addBuffer(vbo);
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * triangle.size(), triangle.data(), GL_STATIC_DRAW);
+    // glVertexAttribPointer(0, triangle[0].size(), GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // glEnableVertexAttribArray(0);
 
     return {vao, vbo};
 }
 
-auto render_triangle(GLuint vao, const Shader& shader) -> void {   
+auto render_triangle(const VertexArray& vao, const Shader& shader) -> void {   
    shader.useShader();
-   glBindVertexArray(vao);
+   glBindVertexArray(vao.getId());
    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 

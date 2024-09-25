@@ -16,11 +16,9 @@ public:
     : x {pos_x}
     , y {pos_y}
     , z {pos_z} 
-    {
-        // fmt::println("Verte created  [{}, {}, {}]", x, y, z);
-    }
+    {}
 
-    auto size() -> int {
+    auto size() const noexcept-> int {
         return 3;
     }
 
