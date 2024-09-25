@@ -72,8 +72,8 @@ auto initApp() noexcept -> bool {
 
     initLog();
 
-    // all callbacks have to be register before ImGui initialization !!!
-    Camera main_camera {window, window_width, window_height, 0.0f, -90.0f, 0.5f, 10.f, {0.0f, 0.0f, 3.0f}};
+    // all callbacks have to be registered before ImGui initialization !!!
+    Camera main_camera {window, window_width, window_height, 0.0f, -90.0f, 0.5f, 3.f, {0.0f, 0.0f, 3.0f}, false};
 
     if(!initImGui(window)) {
        fmt::print(fg(fmt::color::red), "Failed to initialize Dear ImGui!\n");
@@ -104,7 +104,8 @@ auto initApp() noexcept -> bool {
         prev_frame = curr_frame;
 
         glfwPollEvents();
-        proccessInput(window);
+        proccessInput(window); // to be removed
+        main_camera.proccessInput();
 
         main_camera.updatePosition(static_cast<float>(delta_time));
         main_camera.cameraLog();
@@ -114,7 +115,6 @@ auto initApp() noexcept -> bool {
         ImGui::NewFrame();
         ImGui::ShowDemoWindow(); // Show demo window! :)
         
-
         glClearColor(0.902, 0.878, 0.796, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -153,7 +153,7 @@ auto initImGui(GLFWwindow *window) noexcept -> bool
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     //! Enable Keyboard Controls  (left for now though interferes with camera)
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
 

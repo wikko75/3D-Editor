@@ -7,7 +7,7 @@
 class Camera
 {
 public:
-    Camera(GLFWwindow* window, float windowWidth, float windowHight, float pitch, float yaw, float sensitivity, float speed, const glm::vec3& position);
+    Camera(GLFWwindow* window, float windowWidth, float windowHight, float pitch, float yaw, float sensitivity, float speed, const glm::vec3& position, bool is_active);
 
     static auto cursorPosCallbackStatic(GLFWwindow* window, double xpos, double ypos) -> void;
 
@@ -37,6 +37,8 @@ public:
 
     auto cameraLog() const noexcept -> void;
 
+    auto proccessInput() noexcept -> void;
+
     ~Camera() = default;
 
 private:
@@ -50,6 +52,7 @@ private:
     float speed;
     glm::vec3 direction;
     glm::vec3 position;
+    bool is_active;
 };
 
 #endif

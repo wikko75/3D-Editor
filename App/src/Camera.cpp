@@ -2,7 +2,7 @@
 #include "fmt/color.h"
 #include "imgui.h"
 
-Camera::Camera(GLFWwindow* window, float windowWidth, float windowHight, float pitch, float yaw, float sensitivity, float speed,  const glm::vec3& position) 
+Camera::Camera(GLFWwindow* window, float windowWidth, float windowHight, float pitch, float yaw, float sensitivity, float speed, const glm::vec3& position, bool active) 
     : window {window}
     , firstMovement {true}
     , pitch {pitch}, yaw {yaw}
@@ -12,6 +12,7 @@ Camera::Camera(GLFWwindow* window, float windowWidth, float windowHight, float p
     , speed {speed}
     , position {position}
     , direction {}
+    , is_active {active}
 {        
     glfwSetWindowUserPointer(window, this);
     glfwSetCursorPosCallback(window, cursorPosCallbackStatic);
@@ -23,8 +24,10 @@ Camera::Camera(GLFWwindow* window, float windowWidth, float windowHight, float p
     setDirection(glm::normalize(this->direction));
 }
 
-auto Camera::updatePosition(float deltaTime) noexcept -> void 
-{
+auto Camera::updatePosition(float deltaTime) noexcept -> void {
+    if (!is_active)
+        return;
+    
     glm::vec3 cameraPosition { this->getPosition() };
     glm::vec3 up { 0.0, 1.0f, 0.0f };
 
@@ -58,20 +61,17 @@ auto Camera::updatePosition(float deltaTime) noexcept -> void
 }
 
 
-auto Camera::setDirection(const glm::vec3 &newDirection) noexcept -> void
-{
+auto Camera::setDirection(const glm::vec3 &newDirection) noexcept -> void {
     this->direction = newDirection;
 }
 
 
-auto Camera::setPosition(const glm::vec3 &newPosition) noexcept -> void
-{
+auto Camera::setPosition(const glm::vec3 &newPosition) noexcept -> void {
     this->position = newPosition;
 }
 
 
-auto Camera::setSensitivity(float newSensitivity) noexcept -> void
-{
+auto Camera::setSensitivity(float newSensitivity) noexcept -> void {
     if (newSensitivity < 0.01f)
     {
         fmt::print(fg(fmt::color::yellow), "Camera Sensitivity must be > 0!\n");
@@ -85,8 +85,7 @@ auto Camera::setSensitivity(float newSensitivity) noexcept -> void
 }
 
 
-auto Camera::setSpeed(float newSpeed) noexcept -> void
-{
+auto Camera::setSpeed(float newSpeed) noexcept -> void {
     
     if (newSpeed < 0.01f)
     {
@@ -101,31 +100,26 @@ auto Camera::setSpeed(float newSpeed) noexcept -> void
 }
 
 
-auto Camera::getDirection() const noexcept -> glm::vec3
-{
+auto Camera::getDirection() const noexcept -> glm::vec3 {
     return this->direction;
 }
 
-auto Camera::getPosition() const noexcept -> glm::vec3
-{
+auto Camera::getPosition() const noexcept -> glm::vec3 {
     return this->position;
 }
 
 
-auto Camera::getSensitivity() const noexcept -> float
-{
+auto Camera::getSensitivity() const noexcept -> float {
     return this->sensitivity;
 }
 
 
-auto Camera::getSpeed() const noexcept -> float
-{
+auto Camera::getSpeed() const noexcept -> float {
     return this->speed;
 }
 
 
-auto Camera::cursorPosCallbackStatic(GLFWwindow *window, double xpos, double ypos) -> void
-{
+auto Camera::cursorPosCallbackStatic(GLFWwindow *window, double xpos, double ypos) -> void {
     Camera* camera { static_cast<Camera*>(glfwGetWindowUserPointer(window))};
 
     if (!camera)
@@ -134,36 +128,44 @@ auto Camera::cursorPosCallbackStatic(GLFWwindow *window, double xpos, double ypo
     if(ImGui::GetIO().WantCaptureMouse)
         return;
     
-    
     camera->cursorPosCallback(window, xpos, ypos);
 }
 
 
-auto Camera::getYaw() const noexcept -> float
-{
+auto Camera::getYaw() const noexcept -> float {
     return this->yaw;
 }
 
 
-auto Camera::getPitch() const noexcept -> float
-{
+auto Camera::getPitch() const noexcept -> float {
     return this->pitch;
 }
 
 
-auto Camera::cameraLog() const noexcept -> void
-{
+auto Camera::cameraLog() const noexcept -> void {
     fmt::print(fg(fmt::color::yellow),
      "Camera position: [{}, {}, {}]\nCamera Yaw: [{}]\nCamera Pitch: [{}]\nCamera direction: [{}, {}, {}]\n\n",
       this->getPosition().x, this->getPosition().y, this->getPosition().z, this->getYaw(), this->getPitch(), this->direction.x, this->direction.y, this->direction.z);
 }
 
 
-auto Camera::cursorPosCallback(GLFWwindow *window, double xpos, double ypos) -> void
-{
-    // fmt::print("{}\n", firstMovement);
-    if (firstMovement)
-    {
+auto Camera::proccessInput() noexcept -> void {
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+        is_active = true; fmt::print("Active!\n");
+    
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
+        is_active = false;
+}
+
+
+auto Camera::cursorPosCallback(GLFWwindow *window, double xpos, double ypos) -> void {
+    if (!is_active) {
+        lastX = xpos;
+        lastY = ypos;
+        return;
+    }
+
+    if (firstMovement) {
         lastX = static_cast<float>(xpos);
         lastY = static_cast<float>(ypos);
         firstMovement = false;
@@ -172,7 +174,7 @@ auto Camera::cursorPosCallback(GLFWwindow *window, double xpos, double ypos) -> 
     float xOffset { static_cast<float>((xpos - lastX) * sensitivity) };
     float yOffset { static_cast<float>((lastY - ypos) * sensitivity) };
 
-    // fmt::print("xOffset: [{}]\nyOffset: [{}]\n\n", xOffset, yOffset);
+    fmt::print("xOffset: [{}]\nyOffset: [{}]\n\n", xOffset, yOffset);
 
     yaw += xOffset;
     pitch += yOffset;
@@ -180,12 +182,10 @@ auto Camera::cursorPosCallback(GLFWwindow *window, double xpos, double ypos) -> 
     lastX = static_cast<float>(xpos);
     lastY = static_cast<float>(ypos);
 
-    if (pitch > 89.0f)
-    {
+    if (pitch > 89.0f) {
         pitch = 89.0f; 
     }
-    if (pitch < -89.0f)
-    {
+    if (pitch < -89.0f) {
         pitch = -89.0f;
     }
 
