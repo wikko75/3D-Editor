@@ -3,6 +3,9 @@
 in vec3 frag_pos;
 out vec4 color_out;
 
+uniform vec4 in_color = vec4(1.0, 1.0, 1.0, 1.0);
+
 void main() {
-    color_out = vec4(frag_pos, 1.0);
+    
+    color_out = in_color;
 }

@@ -13,19 +13,10 @@
 #include "Camera.hpp"
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
-
+#include "Renderer.hpp"
 
 
 auto setup_triangle_data() -> std::pair<VertexArray, VertexBuffer> {
-
-    // GLuint vao{};
-    // glGenVertexArrays(1, &vao);
-    // glBindVertexArray(vao);
-    
-    // GLuint vbo {};
-    // glGenBuffers(1, &vbo);
-    // glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
     VertexArray vao;
 
     std::vector<Vertex> triangle {
@@ -35,19 +26,9 @@ auto setup_triangle_data() -> std::pair<VertexArray, VertexBuffer> {
     };
 
     VertexBuffer vbo {triangle, 0};
-
     vao.addBuffer(vbo);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * triangle.size(), triangle.data(), GL_STATIC_DRAW);
-    // glVertexAttribPointer(0, triangle[0].size(), GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    // glEnableVertexAttribArray(0);
 
     return {vao, vbo};
-}
-
-auto render_triangle(const VertexArray& vao, const Shader& shader) -> void {   
-   shader.useShader();
-   glBindVertexArray(vao.getId());
-   glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 
@@ -106,6 +87,10 @@ auto initApp() noexcept -> bool {
     double curr_frame {};
     double delta_time {};
     
+    float triangle_color[4];
+
+    Renderer renderer {window};
+
     while (!glfwWindowShouldClose(window)) {
         curr_frame = glfwGetTime();
         delta_time = curr_frame - prev_frame;
@@ -121,10 +106,11 @@ auto initApp() noexcept -> bool {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::ShowDemoWindow(); // Show demo window! :)
-        
-        glClearColor(0.902, 0.878, 0.796, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
+        // ImGui::ShowDemoWindow(); // Show demo window! :)
+
+        ImGui::ColorEdit4("Triangle Color", triangle_color);
+
+        renderer.clear({0.902, 0.878, 0.796, 1});
 
         view_mtx = glm::lookAt(main_camera.getPosition(), main_camera.getPosition() + main_camera.getDirection(), { 0.0f, 1.0f, 0.0f });
         projection_mtx = glm::perspective(glm::radians(90.f), (float)window_width / window_height, 0.1f, 100.f);
@@ -135,8 +121,9 @@ auto initApp() noexcept -> bool {
         triangle_shader.setUniformMatrix4f("model_mtx", GL_FALSE, glm::value_ptr(model_mtx));
         triangle_shader.setUniformMatrix4f("view_mtx", GL_FALSE, glm::value_ptr(view_mtx));
         triangle_shader.setUniformMatrix4f("projection_mtx", GL_FALSE, glm::value_ptr(projection_mtx));
+        triangle_shader.setUniform4f("in_color", triangle_color[0], triangle_color[1], triangle_color[2], triangle_color[3]);
 
-        render_triangle(vao, triangle_shader);
+        renderer.render(vao, triangle_shader);
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -148,6 +135,8 @@ auto initApp() noexcept -> bool {
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
     glfwTerminate();
+
+    fmt::print(fg(fmt::color::ghost_white), "Bye :D\n");
 
     return 0;
 }

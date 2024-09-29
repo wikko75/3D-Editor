@@ -7,6 +7,7 @@ target_sources(Renderer
                         src/Shader.cpp
                         inc/VertexBuffer.hpp
                         inc/VertexArray.hpp
+                        inc/Renderer.hpp
 )
 
 target_include_directories(Renderer PUBLIC  inc)
