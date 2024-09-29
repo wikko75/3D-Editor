@@ -32,7 +32,9 @@ public:
         return m_id;
     }
 
-    ~VertexBuffer() = default;
+    ~VertexBuffer() {
+        glDeleteBuffers(0, &m_id);
+    }
 
 private:
     GLuint m_id;

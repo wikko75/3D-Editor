@@ -24,18 +24,18 @@ public:
         glBindVertexArray(0);
     }
 
-    auto addBuffer(VertexBuffer& buffer) -> void {
+    auto addBuffer(const VertexBuffer& buffer) -> void {
         m_buffers.emplace_back(buffer);
     }
 
     auto bindBuffers() const noexcept -> void {
-        for (const auto buffer : m_buffers) {
+        for (const auto& buffer : m_buffers) {
             buffer.bind();
         }
     }
 
     auto unbindBuffers() const noexcept -> void {
-        for (const auto buffer : m_buffers) {
+        for (const auto& buffer : m_buffers) {
             buffer.unbind();
         }
     }
@@ -44,7 +44,9 @@ public:
         return m_id;
     }
 
-    ~VertexArray() = default;
+    ~VertexArray() {
+        glDeleteVertexArrays(0, &m_id);
+    }
 
 private:
     GLuint m_id;
