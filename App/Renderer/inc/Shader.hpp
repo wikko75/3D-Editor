@@ -4,9 +4,20 @@
 #include <GL/glew.h>
 #include <filesystem>
 #include <string>
+#include <expected>
+
 
 class Shader
 {
+
+public:
+
+    enum ERROR {
+        LOADING,
+        COMPILING,
+        LINKING,
+    };
+
 public:
     Shader(const std::filesystem::path& vertexShader, const std::filesystem::path& fragmentShader);
 
@@ -26,8 +37,15 @@ public:
 
     ~Shader() = default;
 
+
 private:
-    GLuint program;
+    auto loadShaderSource(const std::filesystem::path& vertexShader, const std::filesystem::path& fragmentShader) const noexcept -> std::expected<std::pair<std::string, std::string>, ERROR>;
+   
+    auto compileShader(const char* shader_src, unsigned int type) const noexcept -> std::expected<unsigned int, ERROR>;
+   
+    auto createShaderProgram(unsigned int vertex_shader, unsigned int fragment_shader) noexcept -> std::expected<void, ERROR>;
+private:
+    GLuint m_program;
 };
 
 #endif

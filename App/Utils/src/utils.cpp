@@ -29,8 +29,8 @@ auto initLog() noexcept -> void {
 
 
 
-
-auto shaderStatusLogger(GLuint shader) -> void {
+// std::unexpected
+auto shaderStatusLogger(GLuint shader) -> std::expected<void, bool> {
     char log[512];
     int STATUS_OK {0};
     glGetShaderiv(shader, GL_COMPILE_STATUS, &STATUS_OK);
@@ -39,11 +39,15 @@ auto shaderStatusLogger(GLuint shader) -> void {
     {
         glGetShaderInfoLog(shader, 512, nullptr, log);
         fmt::print(fg(fmt::color::red), "Shader: {}\nShader compilation failed!\nLOG: {}", shader, log);
+
+        return std::unexpected{false};
     }
+
+    return {};
 }
 
 
-auto programStatusLogger(GLuint program) -> void {
+auto programStatusLogger(GLuint program) -> std::expected<void, bool> {
     char log[512];
     int STATUS_OK {0};
     glGetProgramiv(program, GL_LINK_STATUS, &STATUS_OK);
@@ -52,7 +56,11 @@ auto programStatusLogger(GLuint program) -> void {
     {
         glGetProgramInfoLog(program, 512, nullptr, log);
         fmt::print(fg(fmt::color::red), "Program: {}\nProgram linking failed!\nLOG: {}", program, log);
+
+        return std::unexpected{false};
     }
+
+    return {};
 }
 
 auto proccessInput(GLFWwindow *window) noexcept -> void {
