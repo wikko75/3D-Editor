@@ -20,10 +20,24 @@ public:
         }
     }
 
-    auto render(const VertexArray& vao, const Shader& shader) const noexcept -> void {
+    enum class DRAW_TYPE
+    {
+        ARRAYS,
+        INDICES
+    };
+
+    auto render(const VertexArray& vao, const Shader& shader, DRAW_TYPE type, GLenum render_mode) const noexcept -> void {
         shader.useShader();
-        glBindVertexArray(vao.getId());
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        vao.bind();
+
+        if (type == DRAW_TYPE::ARRAYS)
+        {
+            glDrawArrays(render_mode, 0, 3);
+        }
+        else if (type == DRAW_TYPE::INDICES)
+        {
+            glDrawElements(render_mode, 6, GL_UNSIGNED_INT, 0);
+        }
     }
 
     auto clear(glm::vec4 clear_color = {1.0f, 1.0f, 1.0f, 1.0f}) const noexcept -> void {

@@ -13,22 +13,27 @@
 #include "Camera.hpp"
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
+#include "IndexBuffer.hpp"
 #include "Renderer.hpp"
 
 
-auto setup_triangle_data() -> std::pair<VertexArray, VertexBuffer> {
-    VertexArray vao;
-
-    std::vector<Vertex> triangle {
+auto setup_triangle_data() -> std::pair<std::vector<Vertex>, std::vector<unsigned int>>
+{
+    std::vector<Vertex> triangle 
+    {
+        { 0.5f,  0.5f, 0.0f},
+        { 0.5f, -0.5f, 0.0f},
         {-0.5f, -0.5f, 0.0f},
-        {0.5f, -0.5f, 0.0f},
-        {0.0f, 0.5f, 0.0f},    
+        {-0.5f,  0.5f, 0.0f},    
     };
 
-    VertexBuffer vbo {triangle, 0};
-    vao.addBuffer(vbo);
+    std::vector<unsigned int> indices 
+    {
+        0, 1, 3,
+        1, 2, 3
+    };
 
-    return {vao, vbo};
+    return {triangle, indices};
 }
 
 
@@ -72,7 +77,7 @@ auto initApp() noexcept -> bool {
     glViewport(0, 0, window_width, window_height);
     glfwSetFramebufferSizeCallback(window, windowFramebufferSizeCallback);
     
-    auto [vao, vbo] { setup_triangle_data() };
+    auto [vertices, indices] { setup_triangle_data() };
 
     Shader triangle_shader {
         std::filesystem::current_path() / "App"  / "assets" / "shaders" / "test_vertex.glsl",
@@ -123,7 +128,10 @@ auto initApp() noexcept -> bool {
         triangle_shader.setUniformMatrix4f("projection_mtx", GL_FALSE, glm::value_ptr(projection_mtx));
         triangle_shader.setUniform4f("in_color", triangle_color[0], triangle_color[1], triangle_color[2], triangle_color[3]);
 
-        renderer.render(vao, triangle_shader);
+        VertexArray vao {};
+        VertexBuffer vbo {vertices, 0};
+        IndexBuffer ib {indices};
+        renderer.render(vao, triangle_shader, Renderer::DRAW_TYPE::INDICES, GL_TRIANGLES);
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

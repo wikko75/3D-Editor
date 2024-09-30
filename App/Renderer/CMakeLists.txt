@@ -6,6 +6,7 @@ target_sources(Renderer
                         inc/Shader.hpp
                         src/Shader.cpp
                         inc/VertexBuffer.hpp
+                        inc/IndexBuffer.hpp
                         inc/VertexArray.hpp
                         inc/Renderer.hpp
 )
