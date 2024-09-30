@@ -3,123 +3,140 @@
 #include "imgui.h"
 
 Camera::Camera(GLFWwindow* window, float windowWidth, float windowHight, float pitch, float yaw, float sensitivity, float speed, const glm::vec3& position, bool active) 
-    : window {window}
-    , firstMovement {true}
-    , pitch {pitch}, yaw {yaw}
-    , lastX {windowWidth / 2}
-    , lastY {windowHight / 2}
-    , sensitivity {sensitivity}
-    , speed {speed}
-    , position {position}
-    , direction {}
-    , is_active {active}
-{        
-    glfwSetWindowUserPointer(window, this);
-    glfwSetCursorPosCallback(window, cursorPosCallbackStatic);
+    : m_window {window}
+    , m_pitch {pitch}
+    , m_yaw {yaw}
+    , m_sensitivity {sensitivity}
+    , m_speed {speed}
+    , m_position {position}
+    , m_is_active {active}
+    , m_lastX {windowWidth / 2}
+    , m_lastY {windowHight / 2}
+    , m_direction {}
+    , m_firstMovement {true}
+{
+    if (!m_window)
+    {
+        fmt::print(fg(fmt::color::red), "CAMERA: no window provided!\n");
+        return;
+    }  
 
-    this->direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    this->direction.y = sin(glm::radians(pitch));
-    this->direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    glfwSetWindowUserPointer(m_window, this);
+    glfwSetCursorPosCallback(m_window, cursorPosCallbackStatic);
+
+    m_direction.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    m_direction.y = sin(glm::radians(m_pitch));
+    m_direction.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
     
-    setDirection(glm::normalize(this->direction));
+    setDirection(glm::normalize(m_direction));
 }
 
-auto Camera::updatePosition(float deltaTime) noexcept -> void {
-    if (!is_active)
+auto Camera::updatePosition(float deltaTime) noexcept -> void 
+{
+    if (!m_is_active)
         return;
     
     glm::vec3 cameraPosition { this->getPosition() };
     glm::vec3 up { 0.0, 1.0f, 0.0f };
 
     // -------- WSAD movement --------
-    if(glfwGetKey(this->window, GLFW_KEY_A) == GLFW_PRESS)
+    if(glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        cameraPosition -=  this->speed * deltaTime * glm::normalize(glm::cross(this->direction, up));
+        cameraPosition -= m_speed * deltaTime * glm::normalize(glm::cross(m_direction, up));
     }
-    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    if(glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        cameraPosition +=  this->speed * deltaTime *  glm::normalize(glm::cross(this->direction, up));
+        cameraPosition += m_speed * deltaTime *  glm::normalize(glm::cross(m_direction, up));
     }
-    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    if(glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        cameraPosition += this->speed * deltaTime * this->direction;
+        cameraPosition += m_speed * deltaTime * m_direction;
     }
-    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    if(glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        cameraPosition -= this->speed * deltaTime * this->direction;
+        cameraPosition -= m_speed * deltaTime * m_direction;
     }
-    if(glfwGetKey(this->window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    if(glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
-        cameraPosition.y += this->speed * deltaTime;
+        cameraPosition.y += m_speed * deltaTime;
     }
-    if(glfwGetKey(this->window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    if(glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
     {
-        cameraPosition.y -= this->speed * deltaTime;
+        cameraPosition.y -= m_speed * deltaTime;
     }
 
-    this->setPosition(cameraPosition);
+    setPosition(cameraPosition);
 }
 
 
-auto Camera::setDirection(const glm::vec3 &newDirection) noexcept -> void {
-    this->direction = newDirection;
+auto Camera::setDirection(const glm::vec3 &newDirection) noexcept -> void 
+{
+    m_direction = newDirection;
 }
 
 
-auto Camera::setPosition(const glm::vec3 &newPosition) noexcept -> void {
-    this->position = newPosition;
+auto Camera::setPosition(const glm::vec3 &newPosition) noexcept -> void 
+{
+    m_position = newPosition;
 }
 
 
-auto Camera::setSensitivity(float newSensitivity) noexcept -> void {
+auto Camera::setSensitivity(float newSensitivity) noexcept -> void 
+{
     if (newSensitivity < 0.01f)
     {
         fmt::print(fg(fmt::color::yellow), "Camera Sensitivity must be > 0!\n");
 
-        this->sensitivity = 0.05f;
+        m_sensitivity = 0.05f;
 
         return;
     }
     
-    this->sensitivity = newSensitivity;
+    m_sensitivity = newSensitivity;
 }
 
 
-auto Camera::setSpeed(float newSpeed) noexcept -> void {
+auto Camera::setSpeed(float newSpeed) noexcept -> void 
+{
     
     if (newSpeed < 0.01f)
     {
         fmt::print(fg(fmt::color::yellow), "Camera Speed must be > 0!\n");
 
-        this->speed = 3.5f;
+        m_speed = 3.5f;
 
         return;
     }
     
-    this->speed = newSpeed;
+    m_speed = newSpeed;
 }
 
 
-auto Camera::getDirection() const noexcept -> glm::vec3 {
-    return this->direction;
+auto Camera::getDirection() const noexcept -> glm::vec3 
+{
+    return m_direction;
 }
 
-auto Camera::getPosition() const noexcept -> glm::vec3 {
-    return this->position;
-}
-
-
-auto Camera::getSensitivity() const noexcept -> float {
-    return this->sensitivity;
+auto Camera::getPosition() const noexcept -> glm::vec3 
+{
+    return m_position;
 }
 
 
-auto Camera::getSpeed() const noexcept -> float {
-    return this->speed;
+auto Camera::getSensitivity() const noexcept -> float 
+{
+    return m_sensitivity;
 }
 
 
-auto Camera::cursorPosCallbackStatic(GLFWwindow *window, double xpos, double ypos) -> void {
+auto Camera::getSpeed() const noexcept -> float 
+{
+    return m_speed;
+}
+
+
+auto Camera::cursorPosCallbackStatic(GLFWwindow *window, double xpos, double ypos) -> void 
+{
     Camera* camera { static_cast<Camera*>(glfwGetWindowUserPointer(window))};
 
     if (!camera)
@@ -132,66 +149,80 @@ auto Camera::cursorPosCallbackStatic(GLFWwindow *window, double xpos, double ypo
 }
 
 
-auto Camera::getYaw() const noexcept -> float {
-    return this->yaw;
+auto Camera::getYaw() const noexcept -> float 
+{
+    return m_yaw;
 }
 
 
-auto Camera::getPitch() const noexcept -> float {
-    return this->pitch;
+auto Camera::getPitch() const noexcept -> float 
+{
+    return m_pitch;
 }
 
 
-auto Camera::cameraLog() const noexcept -> void {
-    fmt::print(fg(fmt::color::yellow),
-     "Camera position: [{}, {}, {}]\nCamera Yaw: [{}]\nCamera Pitch: [{}]\nCamera direction: [{}, {}, {}]\n\n",
-      this->getPosition().x, this->getPosition().y, this->getPosition().z, this->getYaw(), this->getPitch(), this->direction.x, this->direction.y, this->direction.z);
+auto Camera::cameraLog() const noexcept -> void 
+{
+    fmt::print(
+        fg(fmt::color::yellow),
+        "Camera position: [{}, {}, {}]\nCamera Yaw: [{}]\nCamera Pitch: [{}]\nCamera direction: [{}, {}, {}]\n\n",
+        getPosition().x, getPosition().y, getPosition().z, getYaw(), getPitch(), m_direction.x, m_direction.y, m_direction.z
+    );
 }
 
 
-auto Camera::proccessInput() noexcept -> void {
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-        is_active = true; fmt::print("Active!\n");
+auto Camera::proccessInput() noexcept -> void 
+{
+    if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    {
+        m_is_active = true;
+        fmt::print("Active!\n");
+    }
     
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
-        is_active = false;
+    if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
+    {
+        m_is_active = false;
+    }
 }
 
 
-auto Camera::cursorPosCallback(GLFWwindow *window, double xpos, double ypos) -> void {
-    if (!is_active) {
-        lastX = xpos;
-        lastY = ypos;
+auto Camera::cursorPosCallback(GLFWwindow *window, double xpos, double ypos) -> void 
+{
+    if (!m_is_active) 
+    {
+        m_lastX = xpos;
+        m_lastY = ypos;
         return;
     }
 
-    if (firstMovement) {
-        lastX = static_cast<float>(xpos);
-        lastY = static_cast<float>(ypos);
-        firstMovement = false;
+    if (m_firstMovement) 
+    {
+        m_lastX = static_cast<float>(xpos);
+        m_lastY = static_cast<float>(ypos);
+        m_firstMovement = false;
     }   
 
-    float xOffset { static_cast<float>((xpos - lastX) * sensitivity) };
-    float yOffset { static_cast<float>((lastY - ypos) * sensitivity) };
+    const float xOffset { static_cast<float>((xpos - m_lastX) * m_sensitivity) };
+    const float yOffset { static_cast<float>((m_lastY - ypos) * m_sensitivity) };
 
     fmt::print("xOffset: [{}]\nyOffset: [{}]\n\n", xOffset, yOffset);
 
-    yaw += xOffset;
-    pitch += yOffset;
+    m_yaw += xOffset;
+    m_pitch += yOffset;
 
-    lastX = static_cast<float>(xpos);
-    lastY = static_cast<float>(ypos);
+    m_lastX = static_cast<float>(xpos);
+    m_lastY = static_cast<float>(ypos);
 
-    if (pitch > 89.0f) {
-        pitch = 89.0f; 
+    if (m_pitch > 89.0f) {
+        m_pitch = 89.0f; 
     }
-    if (pitch < -89.0f) {
-        pitch = -89.0f;
+    if (m_pitch < -89.0f) {
+        m_pitch = -89.0f;
     }
 
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    m_direction.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    m_direction.y = sin(glm::radians(m_pitch));
+    m_direction.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
 
-    direction = glm::normalize(direction);
+    m_direction = glm::normalize(m_direction);
 }

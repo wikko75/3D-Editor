@@ -42,17 +42,17 @@ public:
     ~Camera() = default;
 
 private:
-    GLFWwindow* window;
-    float pitch;
-    float yaw;
-    float lastX;
-    float lastY;
-    bool firstMovement;
-    float sensitivity;
-    float speed;
-    glm::vec3 direction;
-    glm::vec3 position;
-    bool is_active;
+    GLFWwindow* m_window;
+    float m_pitch;
+    float m_yaw;
+    float m_sensitivity;
+    float m_speed;
+    glm::vec3 m_position;
+    bool m_is_active;
+    float m_lastX;
+    float m_lastY;
+    glm::vec3 m_direction;
+    bool m_firstMovement;
 };
 
 #endif
