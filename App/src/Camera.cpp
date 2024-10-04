@@ -1,26 +1,31 @@
 #include "Camera.hpp"
 #include "fmt/color.h"
 #include "imgui.h"
+#include <glm/gtc/matrix_transform.hpp>
 
-Camera::Camera(GLFWwindow* window, float windowWidth, float windowHight, float pitch, float yaw, float sensitivity, float speed, const glm::vec3& position, bool active) 
+
+
+Camera::Camera(GLFWwindow* window, PROJECTION type, float pitch, float yaw, float sensitivity, float speed, const glm::vec3& position, bool active) 
     : m_window {window}
+    , m_projection_type {type}
     , m_pitch {pitch}
     , m_yaw {yaw}
     , m_sensitivity {sensitivity}
     , m_speed {speed}
     , m_position {position}
     , m_is_active {active}
-    , m_lastX {windowWidth / 2}
-    , m_lastY {windowHight / 2}
+    , m_lastX {}
+    , m_lastY {}
     , m_direction {}
     , m_firstMovement {true}
+    , m_view_mtx {}
+    , m_viewProjectionMatrix {}
 {
     if (!m_window)
     {
         fmt::print(fg(fmt::color::red), "CAMERA: no window provided!\n");
         return;
     }  
-
     glfwSetWindowUserPointer(m_window, this);
     glfwSetCursorPosCallback(m_window, cursorPosCallbackStatic);
 
@@ -29,9 +34,44 @@ Camera::Camera(GLFWwindow* window, float windowWidth, float windowHight, float p
     m_direction.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
     
     setDirection(glm::normalize(m_direction));
+
+    int window_width, window_height;
+    glfwGetWindowSize(window, &window_width, &window_height);
+
+    m_lastX = window_width / 2;
+    m_lastY = window_height / 2;
+
+    m_view_mtx = glm::lookAt(m_position, m_position + m_direction, { 0.0f, 1.0f, 0.0f });
+    m_viewProjectionMatrix = m_view_mtx;
+    m_viewProjectionMatrix = (type == PROJECTION::PERSPECTIVE)
+                                ? 
+                                glm::perspective(glm::radians(90.f), (float)window_width / window_height, 0.1f, 100.f) * m_viewProjectionMatrix
+                                :
+                                (glm::mat4)glm::ortho(0, window_width, 0, window_height) * m_viewProjectionMatrix;
 }
 
-auto Camera::updatePosition(float deltaTime) noexcept -> void 
+auto Camera::update(const float delta_time) noexcept -> void
+{
+    proccessInput();
+
+    updatePosition(delta_time);
+
+    //  update projection - view matrix
+    int window_width, window_height;
+    glfwGetWindowSize(m_window, &window_width, &window_height);
+
+    m_view_mtx = glm::lookAt(m_position, m_position + m_direction, { 0.0f, 1.0f, 0.0f });
+
+    m_viewProjectionMatrix = m_view_mtx;
+    m_viewProjectionMatrix = (m_projection_type == PROJECTION::PERSPECTIVE)
+                                ? 
+                                glm::perspective(glm::radians(90.f), (float)window_width / window_height, 0.1f, 100.f) * m_viewProjectionMatrix
+                                :
+                                (glm::mat4)glm::ortho(0, window_width, 0, window_height) * m_viewProjectionMatrix;
+}
+
+
+auto Camera::updatePosition(const float deltaTime) noexcept -> void 
 {
     if (!m_is_active)
         return;
@@ -185,6 +225,15 @@ auto Camera::proccessInput() noexcept -> void
     }
 }
 
+auto Camera::getViewMatrix() const noexcept -> glm::mat4
+{
+    return m_view_mtx;
+}
+
+auto Camera::getViewProjectionMatrix() const noexcept -> glm::mat4
+{
+    return m_viewProjectionMatrix;
+}
 
 auto Camera::cursorPosCallback(GLFWwindow *window, double xpos, double ypos) -> void 
 {

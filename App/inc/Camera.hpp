@@ -4,16 +4,25 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+
+enum class PROJECTION
+{
+    PERSPECTIVE,
+    ORTHOGRAPHIC
+};
+
 class Camera
 {
 public:
-    Camera(GLFWwindow* window, float windowWidth, float windowHight, float pitch, float yaw, float sensitivity, float speed, const glm::vec3& position, bool is_active);
+    Camera(GLFWwindow* window, PROJECTION projection_type, float pitch, float yaw, float sensitivity, float speed, const glm::vec3& position, bool is_active);
 
+    auto update(const float delta_time) noexcept -> void;
+    
     static auto cursorPosCallbackStatic(GLFWwindow* window, double xpos, double ypos) -> void;
 
     auto cursorPosCallback(GLFWwindow* window, double xpos, double ypos) -> void;
 
-    auto updatePosition(float deltaTime) noexcept -> void;
+    auto updatePosition(const float deltaTime) noexcept -> void;
 
     auto setDirection(const glm::vec3& direction) noexcept -> void;
 
@@ -39,10 +48,15 @@ public:
 
     auto proccessInput() noexcept -> void;
 
+    auto getViewMatrix() const noexcept -> glm::mat4;
+    
+    auto getViewProjectionMatrix() const noexcept -> glm::mat4;
+
     ~Camera() = default;
 
 private:
     GLFWwindow* m_window;
+    PROJECTION m_projection_type;
     float m_pitch;
     float m_yaw;
     float m_sensitivity;
@@ -53,6 +67,8 @@ private:
     float m_lastY;
     glm::vec3 m_direction;
     bool m_firstMovement;
+    glm::mat4 m_view_mtx;
+    glm::mat4 m_viewProjectionMatrix;
 };
 
 #endif
