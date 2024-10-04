@@ -2,27 +2,47 @@
 #define _VERTEX_HPP_
 
 #include <fmt/core.h>
+#include <glm/vec3.hpp>
+
+
+enum class OFFSET
+{
+    POSITION,
+    NORMALS
+};
 
 class Vertex
 {
-private:
-    float x;
-    float y;
-    float z;
-    // normal
-    // ARGB color
 public:
-    Vertex(float pos_x, float pos_y, float pos_z)
-    : x {pos_x}
-    , y {pos_y}
-    , z {pos_z} 
+    Vertex(glm::vec3 position, glm::vec3 normal)
+    : m_position {position}
+    , m_normal   {normal}
     {}
 
-    auto size() const noexcept-> int {
-        return 3;
+    auto count() const noexcept -> unsigned int 
+    {
+        return sizeof(Vertex) / sizeof(float); 
+    }
+
+    static auto getOffset(OFFSET type) -> unsigned int 
+    {
+        if (type == OFFSET::POSITION)
+        {
+            return 0;
+        }
+
+        if (type == OFFSET::NORMALS)
+        {
+            return sizeof(m_position);
+        }
+
+        return 0;
     }
 
     ~Vertex() = default;
+private:
+    glm::vec3 m_position;
+    glm::vec3 m_normal;
 };
 
 #endif
