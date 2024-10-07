@@ -49,6 +49,8 @@ public:
     auto proccessInput() noexcept -> void;
 
     auto getViewMatrix() const noexcept -> glm::mat4;
+
+    auto getProjectionMatrix() const noexcept -> glm::mat4;
     
     auto getViewProjectionMatrix() const noexcept -> glm::mat4;
 
@@ -66,9 +68,10 @@ private:
     float m_lastX;
     float m_lastY;
     glm::vec3 m_direction;
-    bool m_firstMovement;
+    bool m_first_movement;
     glm::mat4 m_view_mtx;
-    glm::mat4 m_viewProjectionMatrix;
+    glm::mat4 m_projection_mtx;
+    glm::mat4 m_view_projection_matrix;
 };
 
 #endif

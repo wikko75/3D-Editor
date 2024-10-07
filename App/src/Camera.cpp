@@ -17,9 +17,10 @@ Camera::Camera(GLFWwindow* window, PROJECTION type, float pitch, float yaw, floa
     , m_lastX {}
     , m_lastY {}
     , m_direction {}
-    , m_firstMovement {true}
+    , m_first_movement {true}
     , m_view_mtx {}
-    , m_viewProjectionMatrix {}
+    , m_projection_mtx {}
+    , m_view_projection_matrix {}
 {
     if (!m_window)
     {
@@ -42,13 +43,15 @@ Camera::Camera(GLFWwindow* window, PROJECTION type, float pitch, float yaw, floa
     m_lastY = window_height / 2;
 
     m_view_mtx = glm::lookAt(m_position, m_position + m_direction, { 0.0f, 1.0f, 0.0f });
-    m_viewProjectionMatrix = m_view_mtx;
-    m_viewProjectionMatrix = (type == PROJECTION::PERSPECTIVE)
+    m_projection_mtx = (type == PROJECTION::PERSPECTIVE)
                                 ? 
-                                glm::perspective(glm::radians(90.f), (float)window_width / window_height, 0.1f, 100.f) * m_viewProjectionMatrix
-                                :
-                                (glm::mat4)glm::ortho(0, window_width, 0, window_height) * m_viewProjectionMatrix;
-}
+                                glm::perspective(glm::radians(90.f), static_cast<float>(window_width) / window_height, 0.1f, 100.f)
+                                :  
+                                //not working yet
+                                (glm::mat4)glm::ortho(0.0f, static_cast<float>(window_width), 0.0f, static_cast<float>(window_height), 0.1f, 100.0f);
+
+    m_view_projection_matrix = m_projection_mtx * m_view_mtx;
+   }
 
 auto Camera::update(const float delta_time) noexcept -> void
 {
@@ -62,12 +65,7 @@ auto Camera::update(const float delta_time) noexcept -> void
 
     m_view_mtx = glm::lookAt(m_position, m_position + m_direction, { 0.0f, 1.0f, 0.0f });
 
-    m_viewProjectionMatrix = m_view_mtx;
-    m_viewProjectionMatrix = (m_projection_type == PROJECTION::PERSPECTIVE)
-                                ? 
-                                glm::perspective(glm::radians(90.f), (float)window_width / window_height, 0.1f, 100.f) * m_viewProjectionMatrix
-                                :
-                                (glm::mat4)glm::ortho(0, window_width, 0, window_height) * m_viewProjectionMatrix;
+    m_view_projection_matrix = m_projection_mtx * m_view_mtx;
 }
 
 
@@ -230,10 +228,18 @@ auto Camera::getViewMatrix() const noexcept -> glm::mat4
     return m_view_mtx;
 }
 
+
+auto Camera::getProjectionMatrix() const noexcept -> glm::mat4
+{
+    return m_projection_mtx;
+}
+
+
 auto Camera::getViewProjectionMatrix() const noexcept -> glm::mat4
 {
-    return m_viewProjectionMatrix;
+    return m_view_projection_matrix;
 }
+
 
 auto Camera::cursorPosCallback(GLFWwindow *window, double xpos, double ypos) -> void 
 {
@@ -244,11 +250,11 @@ auto Camera::cursorPosCallback(GLFWwindow *window, double xpos, double ypos) -> 
         return;
     }
 
-    if (m_firstMovement) 
+    if (m_first_movement) 
     {
         m_lastX = static_cast<float>(xpos);
         m_lastY = static_cast<float>(ypos);
-        m_firstMovement = false;
+        m_first_movement = false;
     }   
 
     const float xOffset { static_cast<float>((xpos - m_lastX) * m_sensitivity) };
