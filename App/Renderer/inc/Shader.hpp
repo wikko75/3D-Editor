@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <string>
 #include <expected>
+#include <unordered_map>
 
 
 class Shader
@@ -25,17 +26,17 @@ public:
 
     auto getProgram() const noexcept -> GLuint;
 
-    auto setUniformf(const char* name, float v0) const noexcept -> void;
+    auto setUniformf(const char* name, const float v0) noexcept -> void;
 
-    auto setUniform3f(const char* name, float v0, float v1, float v2) const noexcept -> void;
+    auto setUniform3f(const char* name, const float v0, const float v1, const float v2) noexcept -> void;
 
-    auto setUniform4f(const char* name, float v0, float v1, float v2, float v3) const noexcept -> void;
+    auto setUniform4f(const char* name, const float v0, const float v1, const float v2, const float v3) noexcept -> void;
 
-    auto setUniformMatrix4f(const char* name, GLboolean transpose, const GLfloat *value) const noexcept -> void;
+    auto setUniformMatrix4f(const char* name, const GLboolean transpose, const GLfloat *value) noexcept -> void;
 
-    auto setUniformMatrix3f(const char* name, GLboolean transpose, const GLfloat *value) const noexcept -> void;
+    auto setUniformMatrix3f(const char* name, const GLboolean transpose, const GLfloat *value) noexcept -> void;
 
-    ~Shader() = default;
+    ~Shader();
 
 
 private:
@@ -46,6 +47,7 @@ private:
     auto createShaderProgram(unsigned int vertex_shader, unsigned int fragment_shader) noexcept -> std::expected<void, ERROR>;
 private:
     GLuint m_program;
+    std::unordered_map<std::string, int> m_uniform_location_map;
 };
 
 #endif

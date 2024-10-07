@@ -6,7 +6,8 @@
 
 
 Shader::Shader(const std::filesystem::path &vertexShaderPath, const std::filesystem::path &fragmentShaderPath)
-: m_program {} 
+: m_program {}
+, m_uniform_location_map {} 
 {
     auto load_result { loadShaderSource(vertexShaderPath, fragmentShaderPath) };
 
@@ -44,29 +45,59 @@ auto Shader::getProgram() const noexcept -> GLuint {
     return this->m_program;
 }
 
-auto Shader::setUniformf(const char* name, float v0) const noexcept -> void 
+auto Shader::setUniformf(const char* name, const float v0) noexcept -> void 
 {
-    glUniform1f(glGetUniformLocation(this->m_program, name), v0);
+    if (m_uniform_location_map.find(name) == m_uniform_location_map.end())
+    {
+        m_uniform_location_map[name] = glGetUniformLocation(m_program, name);
+    }
+
+    glUniform1f(m_uniform_location_map.at(name), v0);
 }
 
-auto Shader::setUniform3f(const char* name, float v0, float v1, float v2) const noexcept -> void 
+auto Shader::setUniform3f(const char* name, const float v0, const float v1, const float v2) noexcept -> void 
 {
-    glUniform3f(glGetUniformLocation(this->m_program, name), v0, v1, v2);
+    if (m_uniform_location_map.find(name) == m_uniform_location_map.end())
+    {
+        m_uniform_location_map[name] = glGetUniformLocation(m_program, name);
+    }
+    
+    glUniform3f(m_uniform_location_map.at(name), v0, v1, v2);
 }
 
-auto Shader::setUniform4f(const char* name, float v0, float v1, float v2, float v3) const noexcept -> void 
+auto Shader::setUniform4f(const char* name, const float v0, const float v1, const float v2, const float v3) noexcept -> void 
 {
-    glUniform4f(glGetUniformLocation(this->m_program, name), v0, v1, v2, v3);
+    if (m_uniform_location_map.find(name) == m_uniform_location_map.end())
+    {
+        m_uniform_location_map[name] = glGetUniformLocation(m_program, name);
+    }
+    
+    glUniform4f(m_uniform_location_map.at(name), v0, v1, v2, v3);
 }
 
-auto Shader::setUniformMatrix3f(const char* name, GLboolean transpose, const GLfloat *value) const noexcept -> void 
+auto Shader::setUniformMatrix3f(const char* name, GLboolean transpose, const GLfloat *value) noexcept -> void 
 {
-    glUniformMatrix3fv(glGetUniformLocation(this->m_program, name), 1, transpose, value);
+    if (m_uniform_location_map.find(name) == m_uniform_location_map.end())
+    {
+        m_uniform_location_map[name] = glGetUniformLocation(m_program, name);
+    }
+    
+    glUniformMatrix3fv(m_uniform_location_map.at(name), 1, transpose, value);
 }
 
-auto Shader::setUniformMatrix4f(const char* name, GLboolean transpose, const GLfloat *value) const noexcept -> void 
+Shader::~Shader()
 {
-    glUniformMatrix4fv(glGetUniformLocation(this->m_program, name), 1, transpose, value);
+    // glDeleteProgram(m_program);
+}
+
+auto Shader::setUniformMatrix4f(const char* name, GLboolean transpose, const GLfloat *value) noexcept -> void 
+{
+    if (m_uniform_location_map.find(name) == m_uniform_location_map.end())
+    {
+        m_uniform_location_map[name] = glGetUniformLocation(m_program, name);
+    }
+    
+    glUniformMatrix4fv(m_uniform_location_map.at(name), 1, transpose, value);
 }
 
 auto Shader::loadShaderSource(const std::filesystem::path &vertexShader, const std::filesystem::path &fragmentShader) const noexcept -> std::expected<std::pair<std::string, std::string>, ERROR>
