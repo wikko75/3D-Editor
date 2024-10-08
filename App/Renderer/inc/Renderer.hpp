@@ -36,7 +36,7 @@ public:
         }
         else if (type == DRAW_TYPE::INDICES)
         {
-            glDrawElements(render_mode, 6, GL_UNSIGNED_INT, 0);
+            glDrawElements(render_mode, 36, GL_UNSIGNED_INT, 0);
         }
     }
 
