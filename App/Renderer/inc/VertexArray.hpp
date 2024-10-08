@@ -2,55 +2,73 @@
 #define _VERTEX_ARRAY_HPP
 
 #include <GL/glew.h>
-#include <VertexBuffer.hpp>
+#include "VertexBuffer.hpp"
+#include "IndexBuffer.hpp"
 #include <vector>
-
 class VertexArray
 {
 public:
     VertexArray()
     : m_id{}
-    , m_buffers{} 
+    , m_vertex_buffer{} 
+    , m_index_buffer{}
     {
         glGenVertexArrays(1, &m_id);
         glBindVertexArray(m_id);
     }
 
-    auto bind() const noexcept -> void {
+    auto bind() const noexcept -> void 
+    {
         glBindVertexArray(m_id);
     }
 
-    auto unbind() const noexcept -> void {
+    auto unbind() const noexcept -> void 
+    {
         glBindVertexArray(0);
     }
 
-    auto addBuffer(const VertexBuffer& buffer) -> void {
-        m_buffers.emplace_back(buffer);
+    auto addBuffer(const VertexBuffer& buffer) -> void 
+    {
+        bind();
+        buffer.bind();
+        m_vertex_buffer.emplace_back(buffer);
     }
 
-    auto bindBuffers() const noexcept -> void {
-        for (const auto& buffer : m_buffers) {
-            buffer.bind();
-        }
+    auto addBuffer(const IndexBuffer& buffer) -> void 
+    {
+        bind();
+        buffer.bind();
+        m_index_buffer.emplace_back(buffer);
     }
 
-    auto unbindBuffers() const noexcept -> void {
-        for (const auto& buffer : m_buffers) {
-            buffer.unbind();
-        }
-    }
-
-    auto getId() const noexcept -> GLuint {
+    auto getId() const noexcept -> GLuint 
+    {
         return m_id;
     }
 
-    ~VertexArray() {
-        glDeleteVertexArrays(0, &m_id);
+    auto destroy() noexcept -> void
+    {
+        for (auto& buffer : m_vertex_buffer) 
+        {
+            buffer.destroy();
+        }
+
+        for (auto& buffer : m_index_buffer)
+        {
+            buffer.destroy();
+        }
+
+        glDeleteVertexArrays(1, &m_id);
+
+        fmt::println("Vertex array destroyed!");
     }
+
+    ~VertexArray() = default;
 
 private:
     GLuint m_id;
-    std::vector<VertexBuffer> m_buffers;
+    std::vector<VertexBuffer> m_vertex_buffer;
+    std::vector<IndexBuffer> m_index_buffer;
 };
 
 

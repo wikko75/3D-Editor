@@ -24,11 +24,19 @@ public:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
-    ~IndexBuffer()
+    auto destroy() noexcept -> void
     {
+        if (!glIsBuffer(m_id))
+        {
+            return;
+        }
+
         glDeleteBuffers(1, &m_id);
+        fmt::println("Vertex buffer destroyed!");
+
     }
 
+    ~IndexBuffer() = default;
 private:
     unsigned int m_id;
 };

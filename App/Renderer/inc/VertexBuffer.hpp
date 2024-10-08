@@ -4,41 +4,61 @@
 #include <GL/glew.h>
 #include "Vertex.hpp"
 #include <vector>
+#include "fmt/core.h"
 
 class VertexBuffer
 {
 public:
-    VertexBuffer(const std::vector<Vertex>& vertices, unsigned long size)
+    VertexBuffer(const std::vector<Vertex>& vertices)
     : m_id{}
-    , size {0}  //! to be added
     {
         glGenBuffers(1, &m_id);
         glBindBuffer(GL_ARRAY_BUFFER, m_id);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
+        
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-        glVertexAttribPointer(0, vertices[0].size(), GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); 
+        const auto vertex {vertices[0]};
+
+        // position
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)Vertex::getOffset(OFFSET::POSITION)); 
         glEnableVertexAttribArray(0);
+
+        // normals
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)Vertex::getOffset(OFFSET::NORMALS)); 
+        glEnableVertexAttribArray(1);
+        // fmt::print("Sizeof(vec3)= {}\nvertex.count() = {}\nsizeof(Vertex) = {}", sizeof(glm::vec3), vertex.count(), sizeof(Vertex));
+
     }
 
-    auto bind() const noexcept -> void {
+    auto bind() const noexcept -> void 
+    {
         glBindBuffer(GL_ARRAY_BUFFER, m_id);
     }
 
-    auto unbind() const noexcept -> void {
+    auto unbind() const noexcept -> void 
+    {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    auto getId() const noexcept -> GLuint {
+    auto getId() const noexcept -> GLuint 
+    {
         return m_id;
     }
 
-    ~VertexBuffer() {
-        glDeleteBuffers(0, &m_id);
+    auto destroy() noexcept -> void
+    {
+        if (!glIsBuffer(m_id))
+        {
+            return;
+        }
+
+        glDeleteBuffers(1, &m_id);
+        fmt::println("Vertex buffer destroyed!");
     }
 
+    ~VertexBuffer() = default;
 private:
     GLuint m_id;
-    unsigned long size;  //! to be added
 };
 
 #endif
