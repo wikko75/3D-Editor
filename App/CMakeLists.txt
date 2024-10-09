@@ -3,6 +3,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         inc/init.hpp
         inc/Camera.hpp
         src/Camera.cpp
+        inc/Event.hpp
+        inc/Window.hpp
         ${imgui_SOURCE_DIR}/imgui_draw.cpp
         ${imgui_SOURCE_DIR}/imgui_internal.h
         ${imgui_SOURCE_DIR}/imgui_tables.cpp
