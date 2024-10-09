@@ -22,40 +22,40 @@ auto setup_triangle_data() -> std::pair<std::vector<Vertex>, std::vector<unsigne
 {
     std::vector<Vertex> cubeVertices {
     // front
-    Vertex({ 0.5f,  0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}),  // 0
-    Vertex({ 0.5f, -0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}),  // 1
-    Vertex({-0.5f, -0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}),  // 2
-    Vertex({-0.5f,  0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}),  // 3
+    Vertex({ 0.5f,  0.5f,  0.5f}),  // 0
+    Vertex({ 0.5f, -0.5f,  0.5f}),  // 1
+    Vertex({-0.5f, -0.5f,  0.5f}),  // 2
+    Vertex({-0.5f,  0.5f,  0.5f}),  // 3
 
     // back
-    Vertex({ 0.5f,  0.5f, -0.5f}, { 0.0f,  0.0f, -1.0f}),  // 4
-    Vertex({ 0.5f, -0.5f, -0.5f}, { 0.0f,  0.0f, -1.0f}),  // 5
-    Vertex({-0.5f, -0.5f, -0.5f}, { 0.0f,  0.0f, -1.0f}),  // 6
-    Vertex({-0.5f,  0.5f, -0.5f}, { 0.0f,  0.0f, -1.0f}),  // 7
+    Vertex({ 0.5f,  0.5f, -0.5f}),  // 4
+    Vertex({ 0.5f, -0.5f, -0.5f}),  // 5
+    Vertex({-0.5f, -0.5f, -0.5f}),  // 6
+    Vertex({-0.5f,  0.5f, -0.5f}),  // 7
 
     // left
-    Vertex({-0.5f,  0.5f,  0.5f}, {-1.0f,  0.0f,  0.0f}),  // 8 (3)
-    Vertex({-0.5f, -0.5f,  0.5f}, {-1.0f,  0.0f,  0.0f}),  // 9 (2)
-    Vertex({-0.5f, -0.5f, -0.5f}, {-1.0f,  0.0f,  0.0f}),  // 10 (6)
-    Vertex({-0.5f,  0.5f, -0.5f}, {-1.0f,  0.0f,  0.0f}),  // 11 (7)
+    Vertex({-0.5f,  0.5f,  0.5f}),  // 8 (3)
+    Vertex({-0.5f, -0.5f,  0.5f}),  // 9 (2)
+    Vertex({-0.5f, -0.5f, -0.5f}),  // 10 (6)
+    Vertex({-0.5f,  0.5f, -0.5f}),  // 11 (7)
 
     // right
-    Vertex({ 0.5f,  0.5f,  0.5f}, { 1.0f,  0.0f,  0.0f}),  // 12 (0)
-    Vertex({ 0.5f, -0.5f,  0.5f}, { 1.0f,  0.0f,  0.0f}),  // 13 (1)
-    Vertex({ 0.5f, -0.5f, -0.5f}, { 1.0f,  0.0f,  0.0f}),  // 14 (5)
-    Vertex({ 0.5f,  0.5f, -0.5f}, { 1.0f,  0.0f,  0.0f}),  // 15 (4)
+    Vertex({ 0.5f,  0.5f,  0.5f}),  // 12 (0)
+    Vertex({ 0.5f, -0.5f,  0.5f}),  // 13 (1)
+    Vertex({ 0.5f, -0.5f, -0.5f}),  // 14 (5)
+    Vertex({ 0.5f,  0.5f, -0.5f}),  // 15 (4)
 
     // bottom
-    Vertex({ 0.5f, -0.5f,  0.5f}, { 0.0f, -1.0f,  0.0f}),  // 16 (1)
-    Vertex({ 0.5f, -0.5f, -0.5f}, { 0.0f, -1.0f,  0.0f}),  // 17 (5)
-    Vertex({-0.5f, -0.5f, -0.5f}, { 0.0f, -1.0f,  0.0f}),  // 18 (6)
-    Vertex({-0.5f, -0.5f,  0.5f}, { 0.0f, -1.0f,  0.0f}),  // 19 (2)
+    Vertex({ 0.5f, -0.5f,  0.5f}),  // 16 (1)
+    Vertex({ 0.5f, -0.5f, -0.5f}),  // 17 (5)
+    Vertex({-0.5f, -0.5f, -0.5f}),  // 18 (6)
+    Vertex({-0.5f, -0.5f,  0.5f}),  // 19 (2)
 
     // up
-    Vertex({ 0.5f,  0.5f,  0.5f}, { 0.0f,  1.0f,  0.0f}),  // 20 (0)
-    Vertex({ 0.5f,  0.5f, -0.5f}, { 0.0f,  1.0f,  0.0f}),  // 21 (4)
-    Vertex({-0.5f,  0.5f, -0.5f}, { 0.0f,  1.0f,  0.0f}),  // 22 (7)
-    Vertex({-0.5f,  0.5f,  0.5f}, { 0.0f,  1.0f,  0.0f})   // 23 (3)
+    Vertex({ 0.5f,  0.5f,  0.5f}),  // 20 (0)
+    Vertex({ 0.5f,  0.5f, -0.5f}),  // 21 (4)
+    Vertex({-0.5f,  0.5f, -0.5f}),  // 22 (7)
+    Vertex({-0.5f,  0.5f,  0.5f})   // 23 (3)
     };
 
     std::vector<unsigned int> cubeIndices {
@@ -163,7 +163,7 @@ auto initApp() noexcept -> bool {
         ImGui::Text("Color");
         ImGui::ColorEdit4("Color", color);
         ImGui::BeginTable("tab1", 2);
-        ImGui::TableSetupColumn("COLUMMMMMN");
+        ImGui::TableSetupColumn("COLUM");
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
         ImGui::Text("Row1 | column1");
@@ -210,6 +210,8 @@ auto initApp() noexcept -> bool {
     }
 
     Mesh cube_mesh {cube_triangles};
+
+    cube_mesh.calculateNormals();
 
     vao.destroy();
     
