@@ -6,7 +6,8 @@
 #include "Shader.hpp"
 #include "fmt/color.h"
 #include "glm/vec4.hpp"
-
+#include "Mesh.hpp"
+#include <memory.h>
 class Renderer
 {
 public:
@@ -39,6 +40,12 @@ public:
             glDrawElements(render_mode, 36, GL_UNSIGNED_INT, 0);
         }
     }
+
+    auto render(std::unique_ptr<Mesh> mesh) const noexcept -> void
+    {
+        //
+    }
+
 
     auto clear(glm::vec4 clear_color = {1.0f, 1.0f, 1.0f, 1.0f}) const noexcept -> void {
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);

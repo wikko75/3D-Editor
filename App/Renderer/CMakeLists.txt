@@ -3,11 +3,13 @@ add_library(Renderer STATIC)
 target_sources(Renderer 
                     PRIVATE
                         inc/Vertex.hpp
+                        inc/Triangle.hpp
                         inc/Shader.hpp
                         src/Shader.cpp
                         inc/VertexBuffer.hpp
                         inc/IndexBuffer.hpp
                         inc/VertexArray.hpp
+                        inc/Mesh.hpp
                         inc/Renderer.hpp
 )
 
