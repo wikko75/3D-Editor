@@ -14,7 +14,7 @@ enum class OFFSET
 class Vertex
 {
 public:
-    Vertex(glm::vec3 position, glm::vec3 normal)
+    Vertex(glm::vec3 position, glm::vec3 normal = {0.0f, 0.0f, 0.0f})
     : m_position {position}
     , m_normal   {normal}
     {}
@@ -37,6 +37,21 @@ public:
         }
 
         return 0;
+    }
+
+    auto getPosition() const noexcept -> glm::vec3
+    {
+        return m_position;
+    }
+
+    auto getNormal() const noexcept -> glm::vec3
+    {
+        return m_normal;
+    }
+
+    auto setNormal(glm::vec3 normal) -> void
+    {
+        m_normal = normal;
     }
 
     ~Vertex() = default;
