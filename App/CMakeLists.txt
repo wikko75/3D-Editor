@@ -3,7 +3,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         inc/init.hpp
         inc/Camera.hpp
         src/Camera.cpp
-        inc/Event.hpp
+        inc/Events.hpp
         inc/Window.hpp
         ${imgui_SOURCE_DIR}/imgui_draw.cpp
         ${imgui_SOURCE_DIR}/imgui_internal.h
