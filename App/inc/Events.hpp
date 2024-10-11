@@ -28,6 +28,10 @@ class Event
 public:
     friend EventDispacher;
     virtual auto getEventType() -> EVENT_TYPE = 0;
+    virtual bool isHandled()
+    {
+        return m_is_handled;
+    }
 protected:
     bool m_is_handled = false;
 };
@@ -237,7 +241,7 @@ public:
     virtual EVENT_TYPE getEventType() override
     {
         return staticGetEventType();
-    } 
+    }
 };
 
 
