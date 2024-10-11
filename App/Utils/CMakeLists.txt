@@ -3,6 +3,7 @@ add_library(Utils STATIC)
 target_sources(Utils PRIVATE
     src/utils.cpp
     inc/utils.hpp
+    inc/Logger.hpp
 )
 
 target_compile_options(

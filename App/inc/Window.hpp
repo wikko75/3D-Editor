@@ -8,6 +8,12 @@
 #include <string_view>
 #include "fmt/color.h"
 #include "Events.hpp"
+#include "Logger.hpp"
+
+
+
+static bool is_GLFW_initialized = false;
+static bool is_GLEW_initialized = false;
 
 struct Properties
 {
@@ -18,9 +24,6 @@ struct Properties
 };
 
 
-static bool is_GLFW_initialized = false;
-static bool is_GLEW_initialized = false;
-
 class Window
 {
 public:
@@ -30,15 +33,16 @@ public:
 
         if (m_properties.width < 10 || m_properties.height < 10) 
         {
-            fmt::print(fg(fmt::color::red), "Failed to initialize Window!\nImproper size provided!\n");
+            Logger::LOG( "Failed to initialize Window!\nImproper size provided!", Type::ERROR);
             return;
         }
 
+        // GLFW setup
         if (!is_GLFW_initialized)
         {
             if (!glfwInit()) 
             {
-                fmt::print(fg(fmt::color::red), "Failed to initialize GLFW!\n");
+                Logger::LOG("Failed to initialize GLFW!", Type::ERROR);
                 return;
             }
 
@@ -58,22 +62,23 @@ public:
             nullptr
         );
     
-        if (!m_window) {
-            fmt::print(fg(fmt::color::red), "Failed to initialize Window!\n");
+        if (!m_window) 
+        {
+            Logger::LOG("Failed to initialize Window!", Type::ERROR);
             return;
         }
 
         glfwMakeContextCurrent(m_window);
         glfwSetWindowUserPointer(m_window, &m_properties);
 
-        fmt::print("Window created!\n");
+        Logger::LOG("Window Created!", Type::ERROR);
 
         // GLEW setup
         if (!is_GLEW_initialized)
         {
             if (glewInit() != GLEW_OK) 
             {
-                fmt::print(fg(fmt::color::red), "Failed to initialize GLEW!");
+                Logger::LOG("Failed to initialize GLEW!", Type::ERROR);
                 return;
             }
         }
