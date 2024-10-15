@@ -71,7 +71,7 @@ public:
         glfwMakeContextCurrent(m_window);
         glfwSetWindowUserPointer(m_window, &m_properties);
 
-        Logger::LOG("Window Created!", Type::ERROR);
+        Logger::LOG("Window Created!", Type::INFO);
 
         // GLEW setup
         if (!is_GLEW_initialized)
@@ -211,7 +211,7 @@ private:
         {
             auto window_data { static_cast<Properties*>(glfwGetWindowUserPointer(window)) };
 
-            MouseMovedEvent event {xpos, ypos};
+            MouseMovedEvent event { static_cast<float>(xpos), static_cast<float>(ypos) };
 
             window_data->callback(event);
         });

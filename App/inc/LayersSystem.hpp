@@ -1,9 +1,9 @@
 #ifndef _LAYERS_HPP_
 #define _LAYERS_HPP_
 
+#include "Logger.hpp"
 #include <string>
 #include <vector>
-#include "fmt/core.h"
 #include "Events.hpp"
 
 
@@ -14,18 +14,14 @@ public:
     : m_is_active {true}
     , m_name      {name}
     {
-        fmt::println("Layer {} created!", name);
+        Logger::LOG("Layer " + name + " created", Type::INFO);
     }
 
     virtual auto onUpdate() -> void
-    {
-        fmt::println("Layer | {} | onUpdate()", m_name);
-    }
+    {}
 
     virtual auto onEvent(Event& event) -> void
-    {
-        fmt::println("Layer {} | onEvent() |  ", m_name);
-    }
+    {}
 
     virtual ~Layer() = default;
 
