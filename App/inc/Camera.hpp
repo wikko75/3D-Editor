@@ -3,7 +3,7 @@
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-
+#include "Events.hpp"
 
 enum class PROJECTION
 {
@@ -11,16 +11,26 @@ enum class PROJECTION
     ORTHOGRAPHIC
 };
 
+
+struct CameraSettings
+{
+    PROJECTION projection = PROJECTION::PERSPECTIVE;
+    float aspect_ratio = 16/9.0f;
+    float pitch =  0.0f;
+    float yaw = -90.0f;
+    float sensitivity = 0.5f;
+    float speed = 3.f;
+    bool  active = false;
+};
+
 class Camera
 {
 public:
-    Camera(GLFWwindow* window, PROJECTION projection_type, float pitch, float yaw, float sensitivity, float speed, const glm::vec3& position, bool is_active);
+    Camera(GLFWwindow* window, const glm::vec3& position, const CameraSettings& settings = {} /*DEFAULT SETTINGS*/);
 
     auto update(const float delta_time) noexcept -> void;
-    
-    static auto cursorPosCallbackStatic(GLFWwindow* window, double xpos, double ypos) -> void;
 
-    auto cursorPosCallback(GLFWwindow* window, double xpos, double ypos) -> void;
+   auto onEvent(Event& event) -> void;
 
     auto updatePosition(const float deltaTime) noexcept -> void;
 
@@ -31,6 +41,8 @@ public:
     auto setSensitivity(float sensitivity) noexcept -> void;
 
     auto setSpeed(float speed) noexcept -> void;
+
+    auto setAspectRetio(float aspect_retio) -> void;
 
     auto getDirection() const noexcept -> glm::vec3;
 
@@ -48,6 +60,9 @@ public:
 
     auto proccessInput() noexcept -> void;
 
+    auto is_active() noexcept -> bool;
+
+    // TODO & instead of copy
     auto getViewMatrix() const noexcept -> glm::mat4;
 
     auto getProjectionMatrix() const noexcept -> glm::mat4;
@@ -58,20 +73,16 @@ public:
 
 private:
     GLFWwindow* m_window;
-    PROJECTION m_projection_type;
-    float m_pitch;
-    float m_yaw;
-    float m_sensitivity;
-    float m_speed;
     glm::vec3 m_position;
-    bool m_is_active;
-    float m_lastX;
-    float m_lastY;
+    CameraSettings m_settings;
     glm::vec3 m_direction;
-    bool m_first_movement;
     glm::mat4 m_view_mtx;
     glm::mat4 m_projection_mtx;
     glm::mat4 m_view_projection_matrix;
+
+    float m_lastX = 0.0f;
+    float m_lastY = 0.0f;
+    bool m_first_movement = true;
 };
 
 #endif

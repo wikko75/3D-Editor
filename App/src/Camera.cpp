@@ -5,20 +5,12 @@
 
 
 
-Camera::Camera(GLFWwindow* window, PROJECTION type, float pitch, float yaw, float sensitivity, float speed, const glm::vec3& position, bool active) 
-    : m_window {window}
-    , m_projection_type {type}
-    , m_pitch {pitch}
-    , m_yaw {yaw}
-    , m_sensitivity {sensitivity}
-    , m_speed {speed}
-    , m_position {position}
-    , m_is_active {active}
-    , m_lastX {}
-    , m_lastY {}
+Camera::Camera(GLFWwindow* window, const glm::vec3& position, const CameraSettings& settings) 
+    : m_window    {window}
+    , m_position  {position}
+    , m_settings  {settings}
     , m_direction {}
-    , m_first_movement {true}
-    , m_view_mtx {}
+    , m_view_mtx  {}
     , m_projection_mtx {}
     , m_view_projection_matrix {}
 {
@@ -27,12 +19,10 @@ Camera::Camera(GLFWwindow* window, PROJECTION type, float pitch, float yaw, floa
         fmt::print(fg(fmt::color::red), "CAMERA: no window provided!\n");
         return;
     }  
-    glfwSetWindowUserPointer(m_window, this);
-    glfwSetCursorPosCallback(m_window, cursorPosCallbackStatic);
-
-    m_direction.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    m_direction.y = sin(glm::radians(m_pitch));
-    m_direction.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    
+    m_direction.x = cos(glm::radians(m_settings.yaw)) * cos(glm::radians(m_settings.pitch));
+    m_direction.y = sin(glm::radians(m_settings.pitch));
+    m_direction.z = sin(glm::radians(m_settings.yaw)) * cos(glm::radians(m_settings.pitch));
     
     setDirection(glm::normalize(m_direction));
 
@@ -43,9 +33,9 @@ Camera::Camera(GLFWwindow* window, PROJECTION type, float pitch, float yaw, floa
     m_lastY = window_height / 2;
 
     m_view_mtx = glm::lookAt(m_position, m_position + m_direction, { 0.0f, 1.0f, 0.0f });
-    m_projection_mtx = (type == PROJECTION::PERSPECTIVE)
+    m_projection_mtx = (m_settings.projection == PROJECTION::PERSPECTIVE)
                                 ? 
-                                glm::perspective(glm::radians(90.f), static_cast<float>(window_width) / window_height, 0.1f, 100.f)
+                                glm::perspective(glm::radians(90.f), m_settings.aspect_ratio, 0.1f, 100.f)
                                 :  
                                 //not working yet
                                 (glm::mat4)glm::ortho(0.0f, static_cast<float>(window_width), 0.0f, static_cast<float>(window_height), 0.1f, 100.0f);
@@ -63,15 +53,67 @@ auto Camera::update(const float delta_time) noexcept -> void
     int window_width, window_height;
     glfwGetWindowSize(m_window, &window_width, &window_height);
 
+    // TODO optimise
     m_view_mtx = glm::lookAt(m_position, m_position + m_direction, { 0.0f, 1.0f, 0.0f });
+    m_projection_mtx = glm::perspective(glm::radians(90.f), m_settings.aspect_ratio, 0.1f, 100.f);
 
     m_view_projection_matrix = m_projection_mtx * m_view_mtx;
 }
 
+auto Camera::onEvent(Event &event) -> void
+{
+    EventDispacher dispacher{event};
+
+    dispacher.dispatch<MouseMovedEvent>([this](Event& event)
+    {
+        float xpos {static_cast<MouseMovedEvent&>(event).getX()};
+        float ypos {static_cast<MouseMovedEvent&>(event).getY()};
+        
+        if (!m_settings.active) 
+        {
+            m_lastX = xpos;
+            m_lastY = ypos;
+            return true;
+        }
+
+        if (m_first_movement) 
+        {
+            m_lastX = static_cast<float>(xpos);
+            m_lastY = static_cast<float>(ypos);
+            m_first_movement = false;
+        }   
+
+        const float xOffset { static_cast<float>((xpos - m_lastX) * m_settings.sensitivity) };
+        const float yOffset { static_cast<float>((m_lastY - ypos) * m_settings.sensitivity) };
+
+        fmt::print("xOffset: [{}]\nyOffset: [{}]\n\n", xOffset, yOffset);
+
+        m_settings.yaw += xOffset;
+        m_settings.pitch += yOffset;
+
+        m_lastX = static_cast<float>(xpos);
+        m_lastY = static_cast<float>(ypos);
+
+        if (m_settings.pitch > 89.0f) {
+            m_settings.pitch = 89.0f; 
+        }
+        if (m_settings.pitch < -89.0f) {
+            m_settings.pitch = -89.0f;
+        }
+
+        m_direction.x = cos(glm::radians(m_settings.yaw)) * cos(glm::radians(m_settings.pitch));
+        m_direction.y = sin(glm::radians(m_settings.pitch));
+        m_direction.z = sin(glm::radians(m_settings.yaw)) * cos(glm::radians(m_settings.pitch));
+
+        m_direction = glm::normalize(m_direction);
+        
+        return true;
+    });
+}
 
 auto Camera::updatePosition(const float deltaTime) noexcept -> void 
 {
-    if (!m_is_active)
+    if (!m_settings.active)
         return;
     
     glm::vec3 cameraPosition { this->getPosition() };
@@ -80,27 +122,27 @@ auto Camera::updatePosition(const float deltaTime) noexcept -> void
     // -------- WSAD movement --------
     if(glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        cameraPosition -= m_speed * deltaTime * glm::normalize(glm::cross(m_direction, up));
+        cameraPosition -= m_settings.speed * deltaTime * glm::normalize(glm::cross(m_direction, up));
     }
     if(glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        cameraPosition += m_speed * deltaTime *  glm::normalize(glm::cross(m_direction, up));
+        cameraPosition += m_settings.speed * deltaTime *  glm::normalize(glm::cross(m_direction, up));
     }
     if(glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        cameraPosition += m_speed * deltaTime * m_direction;
+        cameraPosition += m_settings.speed * deltaTime * m_direction;
     }
     if(glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        cameraPosition -= m_speed * deltaTime * m_direction;
+        cameraPosition -= m_settings.speed * deltaTime * m_direction;
     }
     if(glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
-        cameraPosition.y += m_speed * deltaTime;
+        cameraPosition.y += m_settings.speed * deltaTime;
     }
     if(glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
     {
-        cameraPosition.y -= m_speed * deltaTime;
+        cameraPosition.y -= m_settings.speed * deltaTime;
     }
 
     setPosition(cameraPosition);
@@ -125,12 +167,12 @@ auto Camera::setSensitivity(float newSensitivity) noexcept -> void
     {
         fmt::print(fg(fmt::color::yellow), "Camera Sensitivity must be > 0!\n");
 
-        m_sensitivity = 0.05f;
+        m_settings.sensitivity = 0.05f;
 
         return;
     }
     
-    m_sensitivity = newSensitivity;
+    m_settings.sensitivity = newSensitivity;
 }
 
 
@@ -141,14 +183,18 @@ auto Camera::setSpeed(float newSpeed) noexcept -> void
     {
         fmt::print(fg(fmt::color::yellow), "Camera Speed must be > 0!\n");
 
-        m_speed = 3.5f;
+        m_settings.speed = 3.5f;
 
         return;
     }
     
-    m_speed = newSpeed;
+    m_settings.speed = newSpeed;
 }
 
+auto Camera::setAspectRetio(float aspect_retio) -> void
+{
+    m_settings.aspect_ratio = aspect_retio;
+}
 
 auto Camera::getDirection() const noexcept -> glm::vec3 
 {
@@ -163,39 +209,24 @@ auto Camera::getPosition() const noexcept -> glm::vec3
 
 auto Camera::getSensitivity() const noexcept -> float 
 {
-    return m_sensitivity;
+    return m_settings.sensitivity;
 }
 
 
 auto Camera::getSpeed() const noexcept -> float 
 {
-    return m_speed;
+    return m_settings.speed;
 }
-
-
-auto Camera::cursorPosCallbackStatic(GLFWwindow *window, double xpos, double ypos) -> void 
-{
-    Camera* camera { static_cast<Camera*>(glfwGetWindowUserPointer(window))};
-
-    if (!camera)
-        return;
-
-    if(ImGui::GetIO().WantCaptureMouse)
-        return;
-    
-    camera->cursorPosCallback(window, xpos, ypos);
-}
-
 
 auto Camera::getYaw() const noexcept -> float 
 {
-    return m_yaw;
+    return m_settings.yaw;
 }
 
 
 auto Camera::getPitch() const noexcept -> float 
 {
-    return m_pitch;
+    return m_settings.pitch;
 }
 
 
@@ -213,14 +244,19 @@ auto Camera::proccessInput() noexcept -> void
 {
     if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
     {
-        m_is_active = true;
+        m_settings.active = true;
         fmt::print("Active!\n");
     }
     
     if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
     {
-        m_is_active = false;
+        m_settings.active = false;
     }
+}
+
+auto Camera::is_active() noexcept -> bool
+{
+    return m_settings.active;
 }
 
 auto Camera::getViewMatrix() const noexcept -> glm::mat4
@@ -238,46 +274,4 @@ auto Camera::getProjectionMatrix() const noexcept -> glm::mat4
 auto Camera::getViewProjectionMatrix() const noexcept -> glm::mat4
 {
     return m_view_projection_matrix;
-}
-
-
-auto Camera::cursorPosCallback(GLFWwindow *window, double xpos, double ypos) -> void 
-{
-    if (!m_is_active) 
-    {
-        m_lastX = xpos;
-        m_lastY = ypos;
-        return;
-    }
-
-    if (m_first_movement) 
-    {
-        m_lastX = static_cast<float>(xpos);
-        m_lastY = static_cast<float>(ypos);
-        m_first_movement = false;
-    }   
-
-    const float xOffset { static_cast<float>((xpos - m_lastX) * m_sensitivity) };
-    const float yOffset { static_cast<float>((m_lastY - ypos) * m_sensitivity) };
-
-    fmt::print("xOffset: [{}]\nyOffset: [{}]\n\n", xOffset, yOffset);
-
-    m_yaw += xOffset;
-    m_pitch += yOffset;
-
-    m_lastX = static_cast<float>(xpos);
-    m_lastY = static_cast<float>(ypos);
-
-    if (m_pitch > 89.0f) {
-        m_pitch = 89.0f; 
-    }
-    if (m_pitch < -89.0f) {
-        m_pitch = -89.0f;
-    }
-
-    m_direction.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    m_direction.y = sin(glm::radians(m_pitch));
-    m_direction.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-
-    m_direction = glm::normalize(m_direction);
 }
