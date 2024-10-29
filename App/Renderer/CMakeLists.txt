@@ -8,6 +8,7 @@ target_sources(Renderer
                         inc/VertexBuffer.hpp
                         inc/IndexBuffer.hpp
                         inc/VertexArray.hpp
+                        inc/FrameBuffer.hpp
                         inc/Renderer.hpp
 )
 
