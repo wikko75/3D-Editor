@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "Events.hpp"
+#include <algorithm>
 
 
 class Layer
@@ -19,6 +20,9 @@ public:
 
     virtual auto onUpdate() -> void
     {}
+
+    virtual auto onImGuiRender() -> void
+    {};
 
     virtual auto onEvent(Event& event) -> void
     {}
@@ -62,13 +66,13 @@ public:
         return m_layers.end();
     }
 
-    ~LayerVector()
-    {
-        for (auto* layer : m_layers)
-        {
-            delete layer;
-        }
-    }
+    ~LayerVector() = default;
+    // {
+    //     for (auto* layer : m_layers)
+    //     {
+    //         delete layer;
+    //     }
+    // }
 
 private:
     std::vector<Layer*> m_layers;
