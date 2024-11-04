@@ -26,8 +26,6 @@ public:
         // normals
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)Vertex::getOffset(OFFSET::NORMALS)); 
         glEnableVertexAttribArray(1);
-        // fmt::print("Sizeof(vec3)= {}\nvertex.count() = {}\nsizeof(Vertex) = {}", sizeof(glm::vec3), vertex.count(), sizeof(Vertex));
-
     }
 
     auto bind() const noexcept -> void 
@@ -45,18 +43,22 @@ public:
         return m_id;
     }
 
-    auto destroy() noexcept -> void
+    // auto destroy() noexcept -> void
+    // {
+    //     // if (!glIsBuffer(m_id))
+    //     // {
+    //     //     return;
+    //     // }
+
+    //     // glDeleteBuffers(1, &m_id);
+    //     // fmt::println("Vertex buffer destroyed!");
+    // }
+
+    ~VertexBuffer()
     {
-        if (!glIsBuffer(m_id))
-        {
-            return;
-        }
-
         glDeleteBuffers(1, &m_id);
-        fmt::println("Vertex buffer destroyed!");
-    }
 
-    ~VertexBuffer() = default;
+    };
 private:
     GLuint m_id;
 };
