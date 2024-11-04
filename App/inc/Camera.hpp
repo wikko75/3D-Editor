@@ -30,7 +30,9 @@ public:
 
     auto update(const float delta_time) noexcept -> void;
 
-   auto onEvent(Event& event) -> void;
+    auto onEvent(Event& event) -> void;
+
+    auto onMouseMove(float x, float y) -> void;
 
     auto updatePosition(const float deltaTime) noexcept -> void;
 

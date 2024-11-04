@@ -50,9 +50,6 @@ auto Camera::update(const float delta_time) noexcept -> void
     updatePosition(delta_time);
 
     //  update projection - view matrix
-    int window_width, window_height;
-    glfwGetWindowSize(m_window, &window_width, &window_height);
-
     // TODO optimise
     m_view_mtx = glm::lookAt(m_position, m_position + m_direction, { 0.0f, 1.0f, 0.0f });
     m_projection_mtx = glm::perspective(glm::radians(90.f), m_settings.aspect_ratio, 0.1f, 100.f);
@@ -69,11 +66,19 @@ auto Camera::onEvent(Event &event) -> void
         float xpos {static_cast<MouseMovedEvent&>(event).getX()};
         float ypos {static_cast<MouseMovedEvent&>(event).getY()};
         
-        if (!m_settings.active) 
+        onMouseMove(xpos, ypos);
+        return true;
+    });
+}
+
+auto Camera::onMouseMove(float xpos, float ypos) -> void
+{
+    if (!m_settings.active) 
         {
             m_lastX = xpos;
             m_lastY = ypos;
-            return true;
+            // fmt::print("lastX: [{}]\nlastY: [{}]\n\n", m_lastX, m_lastY);
+            return;
         }
 
         if (m_first_movement) 
@@ -86,7 +91,8 @@ auto Camera::onEvent(Event &event) -> void
         const float xOffset { static_cast<float>((xpos - m_lastX) * m_settings.sensitivity) };
         const float yOffset { static_cast<float>((m_lastY - ypos) * m_settings.sensitivity) };
 
-        fmt::print("xOffset: [{}]\nyOffset: [{}]\n\n", xOffset, yOffset);
+        // fmt::print("xOffset: [{}]\nyOffset: [{}]\n\n", xOffset, yOffset);
+        // fmt::print("lastX: [{}]\nlastY: [{}]\n\n", m_lastX, m_lastY);
 
         m_settings.yaw += xOffset;
         m_settings.pitch += yOffset;
@@ -106,9 +112,6 @@ auto Camera::onEvent(Event &event) -> void
         m_direction.z = sin(glm::radians(m_settings.yaw)) * cos(glm::radians(m_settings.pitch));
 
         m_direction = glm::normalize(m_direction);
-        
-        return true;
-    });
 }
 
 auto Camera::updatePosition(const float deltaTime) noexcept -> void 
