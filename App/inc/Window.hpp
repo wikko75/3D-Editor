@@ -5,7 +5,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <functional>
-#include <string_view>
 #include "fmt/color.h"
 #include "Events.hpp"
 #include "Logger.hpp"
@@ -27,7 +26,7 @@ struct Properties
 class Window
 {
 public:
-    Window(const Properties& properties = {"3D Editor", 960, 540, nullptr})
+    Window(const Properties& properties = {"3D Editor", 1200, 800, nullptr})
     : m_properties {properties}
     {
 
