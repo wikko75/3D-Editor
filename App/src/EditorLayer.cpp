@@ -51,8 +51,20 @@ void EditorLayer::onUpdate()
 
     // render to my framebuffer
     m_framebuffer->bind();
+
     m_renderer->clear({0.2, 0.2, 0.2, 1});   
+
+    shader->setUniform3f("u_color", 1.0, 0.5, 0.2);
+    m_mesh->setRenderMode(GL_TRIANGLES);
     m_renderer->render(m_mesh);
+    
+    if (m_edit_mode == EditMode::VERTEX)
+    {
+        shader->setUniform3f("u_color", 1.f, 0.f, 0.0);
+        m_mesh->setRenderMode(GL_POINTS);
+        m_renderer->render(m_mesh);
+    }
+   
     m_framebuffer->unbind();
 }
 
