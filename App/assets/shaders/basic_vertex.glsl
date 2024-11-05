@@ -6,5 +6,8 @@ uniform mat4 u_view_projection_mtx;
 
 void main()
 {
+    // vertex mode
+    gl_PointSize = 15.0;
+
     gl_Position = u_view_projection_mtx * u_model_mtx * vec4(aPos, 1.0);
 }
