@@ -191,6 +191,30 @@ void EditorLayer::onImGuiRender()
                 m_mesh->getTransform() = Mesh::Transformation {};
             }
         }
+
+        static int selected_mode = 0;
+
+        if (ImGui::CollapsingHeader("Edit"))
+        {
+            if (ImGui::RadioButton("Vertex Mode", selected_mode == 1))
+            {
+                selected_mode = 1;
+                m_edit_mode = EditMode::VERTEX;
+            }
+
+            if (ImGui::RadioButton("Face Mode", selected_mode == 2))
+            {
+                selected_mode = 2;
+                m_edit_mode = EditMode::FACE;
+            }
+
+            if(ImGui::RadioButton("None", selected_mode == 0))
+            {
+                selected_mode = 0;
+                m_edit_mode = EditMode::NONE;
+            }
+            // Logger::LOG()
+        }
         ImGui::End();
     }
 }

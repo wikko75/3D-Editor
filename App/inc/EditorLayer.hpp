@@ -11,6 +11,14 @@
 #include "FrameBuffer.hpp"
 
 
+enum class EditMode
+{
+    VERTEX,
+    FACE,
+    NONE
+};
+
+
 class  EditorLayer : public Layer
 {
 public:
@@ -40,6 +48,7 @@ private:
     std::shared_ptr<FrameBuffer> m_framebuffer;
     std::pair<int, int> m_viewport_size;
     std::pair<float, float> m_viewport_mouse_pos;
+    EditMode m_edit_mode {EditMode::NONE};
     
 };
 
