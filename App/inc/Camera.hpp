@@ -44,7 +44,7 @@ public:
 
     auto setSpeed(float speed) noexcept -> void;
 
-    auto setAspectRetio(float aspect_retio) -> void;
+    auto setAspectRatio(float aspect_ratio) -> void;
 
     auto getDirection() const noexcept -> glm::vec3;
 

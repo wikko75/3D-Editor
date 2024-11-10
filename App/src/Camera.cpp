@@ -194,9 +194,9 @@ auto Camera::setSpeed(float newSpeed) noexcept -> void
     m_settings.speed = newSpeed;
 }
 
-auto Camera::setAspectRetio(float aspect_retio) -> void
+auto Camera::setAspectRatio(float aspect_ratio) -> void
 {
-    m_settings.aspect_ratio = aspect_retio;
+    m_settings.aspect_ratio = aspect_ratio;
 }
 
 auto Camera::getDirection() const noexcept -> glm::vec3 
