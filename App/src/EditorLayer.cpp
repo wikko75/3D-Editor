@@ -136,10 +136,22 @@ void EditorLayer::onImGuiRender()
             auto [x_screen_pos, y_screen_pos] {ImGui::GetCursorScreenPos()};
             auto [x_mouse_pos, y_mouse_pos]   {ImGui::GetMousePos()};
 
-            m_viewport_mouse_pos = {x_mouse_pos - x_screen_pos, viewportSizeHeight - (y_screen_pos - y_mouse_pos)};
+            m_viewport_mouse_pos = {x_mouse_pos - x_screen_pos, viewportSizeHeight - (y_screen_pos - y_mouse_pos)};  //viewportSizeHeight - because ImGui y axis is up
 
             float ndc_x = (2.0f * m_viewport_mouse_pos.first) / viewportSizeWidth - 1.0f;
             float ndc_y = 1.0f - (2.0f * m_viewport_mouse_pos.second) / viewportSizeHeight;
+            
+            //  get depth information
+            m_framebuffer->bind();
+            float depth;
+            glReadPixels(m_viewport_mouse_pos.first, y_screen_pos - y_mouse_pos, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+            m_framebuffer->unbind();
+
+            glm::vec4 screen_pos_with_depth = glm::vec4(ndc_x, ndc_y, 2.0f * depth - 1.0f, 1.0f);
+            glm::vec4 world_pos_with_depth = glm::inverse(m_camera->getViewProjectionMatrix() * m_mesh->getModelMatrix()) * screen_pos_with_depth;
+            world_pos_with_depth /= world_pos_with_depth.w;
+
+            Logger::LOG("DEPTH: " + std::to_string(depth), Type::ERROR);
             
             // stats overlay
             ImGui::SetNextWindowBgAlpha(0.35f);
@@ -151,8 +163,10 @@ void EditorLayer::onImGuiRender()
                 ImGui::Text("Viewport stats.");
                 ImGui::Separator();
                 ImGui::Text("Size: (%d,%d)", m_viewport_size.first, m_viewport_size.second);
-                ImGui::Text("Mouse position: (%.1f,%.1f)", m_viewport_mouse_pos.first, m_viewport_mouse_pos.second);
-                ImGui::Text("Mouse position (NDC): (%.1f,%.1f)", ndc_x, ndc_y);
+                ImGui::Text("Mouse position (Viewport): (%.1f,%.1f)", m_viewport_mouse_pos.first, m_viewport_mouse_pos.second);
+                // ImGui::Text("Mouse position (NDC): (%.1f, %.1f, %.1f)", ndc_x, ndc_y, 2.0f * depth - 1.0f);
+                ImGui::Text("Mouse position (Model): (%.1f, %.1f, %.1f, %.1f)", world_pos_with_depth.x, world_pos_with_depth.y, world_pos_with_depth.z, world_pos_with_depth.w);
+                ImGui::Text("Depth: (%.3f)", depth);
                 ImGui::End();
             }
         }
