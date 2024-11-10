@@ -18,7 +18,7 @@ public:
         Logger::LOG("Layer " + name + " created", Type::INFO);
     }
 
-    virtual auto onUpdate() -> void
+    virtual auto onUpdate(float delta_time) -> void
     {}
 
     virtual auto onImGuiRender() -> void

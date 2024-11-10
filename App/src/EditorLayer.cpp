@@ -38,7 +38,7 @@ auto EditorLayer::addMesh(std::shared_ptr<Mesh>& mesh) -> void
 }
 
 
-void EditorLayer::onUpdate()
+void EditorLayer::onUpdate(float delta_time)
 {
     Logger::LOG("Layer | Renderer | onUpdate()", Type::DEBUG);
 

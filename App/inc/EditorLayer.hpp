@@ -30,7 +30,7 @@ public:
 
     auto addMesh(std::shared_ptr<Mesh>& mesh) -> void;
 
-    void onUpdate() override;
+    void onUpdate(float delta_time) override;
 
     void onImGuiRender() override;
 
