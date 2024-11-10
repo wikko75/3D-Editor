@@ -4,6 +4,7 @@
 #include <string_view>
 #include "fmt/core.h"
 #include "fmt/color.h"
+#include "fmt/ranges.h"
 
 enum class Type
 {
