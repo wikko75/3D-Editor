@@ -1,6 +1,7 @@
 #include "Camera.hpp"
 #include "fmt/color.h"
 #include "imgui.h"
+#include "Logger.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
 
@@ -45,8 +46,6 @@ Camera::Camera(GLFWwindow* window, const glm::vec3& position, const CameraSettin
 
 auto Camera::update(const float delta_time) noexcept -> void
 {
-    proccessInput();
-
     updatePosition(delta_time);
 
     //  update projection - view matrix
@@ -59,14 +58,46 @@ auto Camera::update(const float delta_time) noexcept -> void
 
 auto Camera::onEvent(Event &event) -> void
 {
+    Logger::LOG("Camera onEvent!", Type::WARNING);
+
     EventDispacher dispacher{event};
 
     dispacher.dispatch<MouseMovedEvent>([this](Event& event)
     {
+        Logger::LOG("Camera MouseMoved!", Type::WARNING);
+
         float xpos {static_cast<MouseMovedEvent&>(event).getX()};
         float ypos {static_cast<MouseMovedEvent&>(event).getY()};
-        
         onMouseMove(xpos, ypos);
+        
+        return true;
+    });
+
+    dispacher.dispatch<MouseButtonPressedEvent>([this](Event& event)
+    {
+        Logger::LOG("Camera MousePressed!", Type::WARNING);
+        MouseButtonPressedEvent& mouse_event {static_cast<MouseButtonPressedEvent&>(event)};
+        
+        // right mouse button
+        if (mouse_event.getMouseButton() == 1)
+        {   
+            m_settings.active = true;
+        }
+
+        return true;
+    });
+    
+    dispacher.dispatch<MouseButtonReleasedEvent>([this](Event& event)
+    {
+        Logger::LOG("Camera MouseReleased!", Type::WARNING);
+        MouseButtonReleasedEvent& mouse_event {static_cast<MouseButtonReleasedEvent&>(event)};
+        
+        // right mouse button
+        if (mouse_event.getMouseButton() == 1)
+        {   
+            m_settings.active = false;
+        }
+
         return true;
     });
 }
@@ -242,20 +273,6 @@ auto Camera::cameraLog() const noexcept -> void
     );
 }
 
-
-auto Camera::proccessInput() noexcept -> void 
-{
-    if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-    {
-        m_settings.active = true;
-        fmt::print("Active!\n");
-    }
-    
-    if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
-    {
-        m_settings.active = false;
-    }
-}
 
 auto Camera::is_active() noexcept -> bool
 {

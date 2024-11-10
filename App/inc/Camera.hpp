@@ -60,8 +60,6 @@ public:
 
     auto cameraLog() const noexcept -> void;
 
-    auto proccessInput() noexcept -> void;
-
     auto is_active() noexcept -> bool;
 
     // TODO & instead of copy
