@@ -15,15 +15,16 @@ EditorLayer::EditorLayer(Window* window, const std::string& name)
     m_renderer    = std::make_unique<Renderer>(window->getWindow());
     m_framebuffer = std::make_shared<FrameBuffer>(window->getWidth(), window->getHeight());
 
+    m_camera = std::make_shared<Camera>(window->getWindow(), glm::vec3{0.0f, 0.0f, 3.0f});
     m_viewport_size = {window->getWidth(), window->getHeight()};
 }
 
 
-auto EditorLayer::beginScene(std::shared_ptr<Camera> camera) -> void
-{
-    m_camera = camera;
-    //calculate stuff related to camera
-}
+// auto EditorLayer::beginScene(std::shared_ptr<Camera> camera) -> void
+// {
+//     m_camera = camera;
+//     //calculate stuff related to camera
+// }
 
 
 auto EditorLayer::addDrawable(std::shared_ptr<VertexArray> vao, std::shared_ptr<Shader> shader) -> void  // change for mesh
@@ -40,6 +41,8 @@ auto EditorLayer::addMesh(std::shared_ptr<Mesh>& mesh) -> void
 
 void EditorLayer::onUpdate(float delta_time)
 {
+    m_camera->update(delta_time);
+
     Logger::LOG("Layer | Renderer | onUpdate()", Type::DEBUG);
 
     m_mesh->recalculateModelMatrix();
@@ -51,18 +54,20 @@ void EditorLayer::onUpdate(float delta_time)
 
     // render to my framebuffer
     m_framebuffer->bind();
-
-    m_renderer->clear({0.2, 0.2, 0.2, 1});   
-
-    shader->setUniform3f("u_color", 1.0, 0.5, 0.2);
-    m_mesh->setRenderMode(GL_TRIANGLES);
-    m_renderer->render(m_mesh);
     
-    if (m_edit_mode == EditMode::VERTEX)
     {
-        shader->setUniform3f("u_color", 1.f, 0.f, 0.0);
-        m_mesh->setRenderMode(GL_POINTS);
+        m_renderer->clear({0.2, 0.2, 0.2, 1});   
+
+        shader->setUniform3f("u_color", 1.0, 0.5, 0.2);
+        m_mesh->setRenderMode(GL_TRIANGLES);
         m_renderer->render(m_mesh);
+        
+        if (m_edit_mode == EditMode::VERTEX)
+        {
+            shader->setUniform3f("u_color", 1.f, 0.f, 0.0);
+            m_mesh->setRenderMode(GL_POINTS);
+            m_renderer->render(m_mesh);
+        }
     }
    
     m_framebuffer->unbind();
@@ -71,8 +76,12 @@ void EditorLayer::onUpdate(float delta_time)
 
 void EditorLayer::onEvent(Event& event)
 {
-    // capture events
     Logger::LOG("Layer | EditorLayer |  onEvent()", Type::DEBUG);
+    
+    if (m_viewport_active)
+    {
+        m_camera->onEvent(event);
+    }
 
     EventDispacher dispatcher {event};
     dispatcher.dispatch<WindowResizeEvent>([](Event& event)
@@ -115,14 +124,15 @@ void EditorLayer::onImGuiRender()
             glViewport(0, 0, viewportSizeWidth, viewportSizeHeight);
             m_framebuffer->resize(m_viewport_size);
 
-            // temp?
-            m_camera->setAspectRetio(viewportSizeWidth / viewportSizeHeight);
+            m_camera->setAspectRatio(viewportSizeWidth / viewportSizeHeight);
         }
 
 
 
-        if (ImGui::IsWindowHovered())
-        {
+        if (ImGui::IsWindowHovered() && ImGui::IsWindowFocused())
+        {   
+            m_viewport_active = true;
+
             auto [x_screen_pos, y_screen_pos] {ImGui::GetCursorScreenPos()};
             auto [x_mouse_pos, y_mouse_pos]   {ImGui::GetMousePos()};
 
@@ -135,6 +145,7 @@ void EditorLayer::onImGuiRender()
             ImGui::SetNextWindowBgAlpha(0.35f);
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
             ImGui::SetNextWindowPos({ImGui::GetWindowPos().x + 20, ImGui::GetWindowPos().y + 50});
+            
             if (ImGui::Begin("ViewportStats",nullptr, window_flags))
             {   
                 ImGui::Text("Viewport stats.");
@@ -145,6 +156,11 @@ void EditorLayer::onImGuiRender()
                 ImGui::End();
             }
         }
+        else
+        {
+            m_viewport_active = false;
+        }
+
         ImGui::End();   
     }
 
