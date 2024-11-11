@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 project(
     3D_Editor
     VERSION 1.0 
@@ -35,9 +38,49 @@ message("Fetching GLEW...")
 
 FetchContent_MakeAvailable(GLEW)
 
+FetchContent_Declare(
+	glm
+	GIT_REPOSITORY	https://github.com/g-truc/glm.git
+	GIT_TAG 	1.0.0  
+    GIT_SHALLOW TRUE
+)
+
+message("Fetching GLM...")
+
+FetchContent_MakeAvailable(glm)
+
+# Fetch DearImGui
+FetchContent_Declare(
+    imgui
+    GIT_REPOSITORY https://github.com/ocornut/imgui.git
+    GIT_TAG v1.91.0-docking
+    GIT_SHALLOW TRUE
+)
+
+message("Fetching Dear ImGui...")
+
+FetchContent_MakeAvailable(imgui)
+
+# Fetch fmt
+FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 11.0.2
+    GIT_SHALLOW TRUE       
+)
+
+message("Fetching fmt...")
+
+FetchContent_MakeAvailable(fmt)
+
 add_executable(${PROJECT_NAME})
 
-target_sources(${PROJECT_NAME} PRIVATE main.cpp)
+add_subdirectory(App)
+
+target_sources(${PROJECT_NAME} 
+    PRIVATE 
+        main.cpp
+)
 
 target_compile_options(
     ${PROJECT_NAME} PRIVATE
@@ -47,5 +90,10 @@ target_compile_options(
     -Wuninitialized
 )
 
+target_link_libraries(${PROJECT_NAME} PRIVATE GL glfw GLEW glm::glm fmt)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw GLEW)
+# message(STATUS "Available variables:")
+# get_cmake_property(_variableNames VARIABLES)
+# foreach (_variableName ${_variableNames})
+#     message(STATUS "${_variableName} = ${${_variableName}}")
+# endforeach()
