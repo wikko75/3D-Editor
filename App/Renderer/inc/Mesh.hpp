@@ -1,140 +1,138 @@
 #ifndef _MESH_HPP_
 #define _MESH_HPP_
 
-#include "Triangle.hpp"
-#include <vector>
-#include "fmt/core.h"
-#include "fmt/ranges.h"
-#include <memory>
-#include "glm/glm.hpp"
+#include "Logger.hpp"
+#include "VertexArray.hpp"
+#include "Shader.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+
 
 class Mesh
 {
+
 public:
-    Mesh(const std::vector<Triangle>& triangles)
-    : m_triangles {triangles}
+    struct Transformation
     {
-        fmt::println("Mesh created!\nPrinting Triangles:");
+        glm::vec3 position {0.0f, 0.0f, 0.0f};
+        glm::vec3 rotation {0.0f, 0.0f, 0.0f};
+        glm::vec3 scale    {1.0f, 1.0f, 1.0f};
+    };
 
-        for (const auto& triangle : triangles)
-        {
-            printTriangleData(triangle);
-        }
+public:
+    Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, std::shared_ptr<Shader> shader)
+    : m_vertices   {vertices}
+    , m_indices    {indices}
+    , m_shader     {shader}
+    , m_model_mtx  {glm::mat4(1.0f)}
+    , m_render_mode{GL_TRIANGLES}
+    {
+        Logger::LOG("Mesh created!", Type::ERROR);
 
-        fmt::print("No of triangles: {}\n", m_triangles.size());
+        m_vao = std::make_unique<VertexArray>();
+        m_vbo = std::make_unique<VertexBuffer>(m_vertices);
+        m_ib  = std::make_unique<IndexBuffer>(indices);
+
+        m_vao->addBuffer(m_vbo.get());
+        m_vao->addBuffer(m_ib.get());
+
+        m_selected_vertices = std::vector<bool>(m_vertices.size(), false);
+        fmt::print("Selected vertices: [{}]\n", fmt::join(m_selected_vertices, ","));
+    }
+    
+    auto setVertices(const std::vector<Vertex>& vertices)
+    {
+        m_vertices = vertices;
     }
 
-
-    auto calculateNormals() -> void
+    auto setIndices(const std::vector<unsigned int>& indices)
     {
+        m_indices = indices;
+    }
+
+    auto setShader(std::shared_ptr<Shader> shader) -> void
+    {
+        m_shader = shader;
+    }
+
+    auto getTransform() -> Transformation&
+    {
+        return m_transformation;
+    }
+
+    auto recalculateModelMatrix() -> void
+    {
+        m_model_mtx = glm::mat4{1.0f};
+        m_model_mtx = glm::translate(m_model_mtx, m_transformation.position);
+        m_model_mtx = glm::rotate(m_model_mtx, glm::radians(m_transformation.rotation[0]), {1.0, 0.0, 0.0});
+        m_model_mtx = glm::rotate(m_model_mtx, glm::radians(m_transformation.rotation[1]), {0.0, 1.0, 0.0});
+        m_model_mtx = glm::rotate(m_model_mtx, glm::radians(m_transformation.rotation[2]), {0.0, 0.0, 1.0});
+        m_model_mtx = glm::scale(m_model_mtx, m_transformation.scale);
+    }
+
+    auto selectVertex(int index) -> void
+    {
+        m_selected_vertices[index] = true;
+    }
+
+    auto getSelectedVertices() -> std::vector<bool>&
+    {
+        return m_selected_vertices;
+    }
+
+    auto setRenderMode(GLenum render_mode) -> void
+    {
+        m_render_mode = render_mode;
+    }
+
+    auto getShader() -> Shader*
+    {
+        return m_shader.get();
+    }
         
-        for (auto& [v0, v1, v2] : m_triangles)
-        {
-            v0.setNormal(glm::vec3{0.0f, 0.0f, 0.0f});
-            v1.setNormal(glm::vec3{0.0f, 0.0f, 0.0f});
-            v2.setNormal(glm::vec3{0.0f, 0.0f, 0.0f});
-        }
-
-        for (const auto& triangle : m_triangles)
-        {
-           printTriangleNormal(triangle);
-        }
-
-        glm::vec3 edge_1 {};
-        glm::vec3 edge_2 {};
-
-        glm::vec3 cross_product {};
-        for (auto& [v0, v1, v2] : m_triangles)
-        {
-            edge_1 = v0.getPosition() - v1.getPosition();
-            edge_2 = v2.getPosition() - v1.getPosition();
-
-            cross_product = glm::cross(edge_1, edge_2);
-
-            v0.setNormal(v0.getNormal() + cross_product);
-            v1.setNormal(v1.getNormal() + cross_product);
-            v2.setNormal(v2.getNormal() + cross_product);
-        }
-
-        for (auto [v0, v1, v2] : m_triangles)
-        {
-            v0.setNormal(glm::normalize(v0.getNormal()));
-            v1.setNormal(glm::normalize(v1.getNormal()));
-            v2.setNormal(glm::normalize(v2.getNormal()));
-        }
-
-        for (const auto& triangle : m_triangles)
-        {
-           printTriangleNormal(triangle);
-        }
-
+    auto getModelMatrix() -> const glm::mat4&
+    {
+        return m_model_mtx;
     }
 
-    auto addTriangle(const Triangle& triangle) -> void
+    auto getVao() -> VertexArray*
     {
-        m_triangles.emplace_back(triangle);
+        return m_vao.get();
     }
 
-
-    auto getTriangles() -> std::vector<Triangle>&
+    auto getVerticesCount() -> int
     {
-        return m_triangles;
+        return m_vertices.size();
+    }       
+
+    auto getIndicesCount() -> int
+    {
+        return m_indices.size();
+    } 
+
+    auto getRenderMode() -> GLenum
+    {
+        return m_render_mode;
     }
 
     ~Mesh() = default;
 
-
 private:
-    auto printTriangleData(const Triangle& triangle) const noexcept -> void
-    {
-        glm::vec3 pos {};
-        glm::vec3 nor {};
-        
-        const auto& [v0, v1, v2] {triangle};
+    std::vector<Vertex>       m_vertices;
+    std::vector<unsigned int> m_indices;
+    std::vector<bool> m_selected_vertices;
 
-        pos = v0.getPosition();
-        nor = v0.getNormal();
-        
-        fmt::print("P[{}, {}, {}]\n", pos.x, pos.y, pos.z);
-        fmt::print("N[{}, {}, {}]\n", nor.x, nor.y, nor.z);
+    std::unique_ptr<VertexArray>  m_vao;
+    std::unique_ptr<VertexBuffer> m_vbo;
+    std::unique_ptr<IndexBuffer>  m_ib;
+    std::shared_ptr<Shader>       m_shader;
 
-        pos = v1.getPosition();
-        nor = v1.getNormal();
+    glm::mat4 m_model_mtx;
 
-        fmt::print("P[{}, {}, {}]\n", pos.x, pos.y, pos.z);
-        fmt::print("N[{}, {}, {}]\n", nor.x, nor.y, nor.z);
+    Transformation m_transformation {};
 
-        pos = v2.getPosition();
-        nor = v2.getNormal();
-
-        fmt::print("P[{}, {}, {}]\n", pos.x, pos.y, pos.z);
-        fmt::print("N[{}, {}, {}]\n\n", nor.x, nor.y, nor.z);
-    }
-
-    auto printTriangleNormal(const Triangle& triangle) const noexcept -> void
-    {
-
-        const auto& [v0, v1, v2] {triangle};
-
-        glm::vec3 nor {v0.getNormal()};
-
-        fmt::print("N[{}, {}, {}]\n", nor.x, nor.y, nor.z);
-
-        nor = v1.getNormal();
-
-        fmt::print("N[{}, {}, {}]\n", nor.x, nor.y, nor.z);
-
-        nor = v2.getNormal();
-
-        fmt::print("N[{}, {}, {}]\n\n", nor.x, nor.y, nor.z);
-    }
-
-private:
-    std::vector<Triangle> m_triangles;
-    glm::vec3 m_position { 0, 0, 0 };
-    glm::vec3 m_rotation { 0, 0, 0 };
-    glm::vec3 m_scale    { 1, 1, 1 };
-    glm::mat4 m_model_mtx{};
+    GLenum m_render_mode;
 };
 
 

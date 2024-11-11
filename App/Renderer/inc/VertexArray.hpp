@@ -27,17 +27,17 @@ public:
         glBindVertexArray(0);
     }
 
-    auto addBuffer(const VertexBuffer& buffer) -> void 
+    auto addBuffer(VertexBuffer* buffer) -> void 
     {
         bind();
-        buffer.bind();
+        buffer->bind();
         m_vertex_buffer.emplace_back(buffer);
     }
 
-    auto addBuffer(const IndexBuffer& buffer) -> void 
+    auto addBuffer(IndexBuffer* buffer) -> void 
     {
         bind();
-        buffer.bind();
+        buffer->bind();
         m_index_buffer.emplace_back(buffer);
     }
 
@@ -46,29 +46,33 @@ public:
         return m_id;
     }
 
-    auto destroy() noexcept -> void
-    {
-        for (auto& buffer : m_vertex_buffer) 
-        {
-            buffer.destroy();
-        }
+    // auto destroy() noexcept -> void
+    // {
+    //     for (auto buffer : m_vertex_buffer) 
+    //     {
+    //         buffer->destroy();
+    //     }
 
-        for (auto& buffer : m_index_buffer)
-        {
-            buffer.destroy();
-        }
+    //     for (auto buffer : m_index_buffer)
+    //     {
+    //         buffer->destroy();
+    //     }
+
+    //     glDeleteVertexArrays(1, &m_id);
+
+    //     fmt::println("Vertex array destroyed!");
+    // }
+
+    ~VertexArray()
+    {
 
         glDeleteVertexArrays(1, &m_id);
-
-        fmt::println("Vertex array destroyed!");
-    }
-
-    ~VertexArray() = default;
+    };
 
 private:
     GLuint m_id;
-    std::vector<VertexBuffer> m_vertex_buffer;
-    std::vector<IndexBuffer> m_index_buffer;
+    std::vector<VertexBuffer*> m_vertex_buffer;
+    std::vector<IndexBuffer*> m_index_buffer;
 };
 
 

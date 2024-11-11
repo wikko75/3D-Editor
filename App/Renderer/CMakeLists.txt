@@ -9,8 +9,10 @@ target_sources(Renderer
                         inc/VertexBuffer.hpp
                         inc/IndexBuffer.hpp
                         inc/VertexArray.hpp
+                        inc/FrameBuffer.hpp
                         inc/Mesh.hpp
                         inc/Renderer.hpp
+                        inc/Mesh.hpp
 )
 
 target_include_directories(Renderer PUBLIC  inc)
