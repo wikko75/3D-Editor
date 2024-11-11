@@ -6,6 +6,4 @@
 
 auto initApp() noexcept -> bool;
 
-auto initImGui(GLFWwindow *window) noexcept -> bool;
-
 #endif
