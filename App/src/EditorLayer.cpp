@@ -151,7 +151,9 @@ void EditorLayer::onImGuiRender()
             glm::vec4 world_pos_with_depth = glm::inverse(m_camera->getViewProjectionMatrix() * m_mesh->getModelMatrix()) * screen_pos_with_depth;
             world_pos_with_depth /= world_pos_with_depth.w;
 
-            Logger::LOG("DEPTH: " + std::to_string(depth), Type::ERROR);
+            m_viewport_mouse_pos_model = {world_pos_with_depth.x, world_pos_with_depth.y, world_pos_with_depth.z};
+            
+            // Logger::LOG("DEPTH: " + std::to_string(depth), Type::ERROR);
             
             // stats overlay
             ImGui::SetNextWindowBgAlpha(0.35f);
@@ -165,7 +167,7 @@ void EditorLayer::onImGuiRender()
                 ImGui::Text("Size: (%d,%d)", m_viewport_size.first, m_viewport_size.second);
                 ImGui::Text("Mouse position (Viewport): (%.1f,%.1f)", m_viewport_mouse_pos.first, m_viewport_mouse_pos.second);
                 // ImGui::Text("Mouse position (NDC): (%.1f, %.1f, %.1f)", ndc_x, ndc_y, 2.0f * depth - 1.0f);
-                ImGui::Text("Mouse position (Model): (%.1f, %.1f, %.1f, %.1f)", world_pos_with_depth.x, world_pos_with_depth.y, world_pos_with_depth.z, world_pos_with_depth.w);
+                ImGui::Text("Mouse position (Model): (%.1f, %.1f, %.1f)", m_viewport_mouse_pos_model.x, m_viewport_mouse_pos_model.y, m_viewport_mouse_pos_model.z);
                 ImGui::Text("Depth: (%.3f)", depth);
                 ImGui::End();
             }
