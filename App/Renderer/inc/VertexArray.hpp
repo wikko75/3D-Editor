@@ -27,18 +27,18 @@ public:
         glBindVertexArray(0);
     }
 
-    auto addBuffer(VertexBuffer* buffer) -> void 
+    auto addBuffer(std::shared_ptr<VertexBuffer> buffer) -> void 
     {
         bind();
         buffer->bind();
-        m_vertex_buffer.emplace_back(buffer);
+        m_vertex_buffer = buffer;
     }
 
-    auto addBuffer(IndexBuffer* buffer) -> void 
+    auto addBuffer(std::shared_ptr<IndexBuffer> buffer) -> void 
     {
         bind();
         buffer->bind();
-        m_index_buffer.emplace_back(buffer);
+        m_index_buffer = buffer;
     }
 
     auto getId() const noexcept -> GLuint 
@@ -54,8 +54,8 @@ public:
 
 private:
     GLuint m_id;
-    std::vector<VertexBuffer*> m_vertex_buffer;
-    std::vector<IndexBuffer*> m_index_buffer;
+    std::shared_ptr<VertexBuffer> m_vertex_buffer;
+    std::shared_ptr<IndexBuffer>  m_index_buffer;
 };
 
 

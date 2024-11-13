@@ -31,11 +31,11 @@ public:
         Logger::LOG("Mesh created!", Type::ERROR);
 
         m_vao = std::make_unique<VertexArray>();
-        m_vbo = std::make_unique<VertexBuffer>(m_vertices);
-        m_ib  = std::make_unique<IndexBuffer>(indices);
+        m_vbo = std::make_shared<VertexBuffer>(m_vertices);
+        m_ib  = std::make_shared<IndexBuffer>(indices);
 
-        m_vao->addBuffer(m_vbo.get());
-        m_vao->addBuffer(m_ib.get());
+        m_vao->addBuffer(m_vbo);
+        m_vao->addBuffer(m_ib);
 
         m_selected_vertices = std::vector<bool>(m_vertices.size(), false);
         fmt::print("Selected vertices: [{}]\n", fmt::join(m_selected_vertices, ","));
@@ -173,8 +173,8 @@ private:
     std::vector<bool> m_selected_vertices;
 
     std::unique_ptr<VertexArray>  m_vao;
-    std::unique_ptr<VertexBuffer> m_vbo;
-    std::unique_ptr<IndexBuffer>  m_ib;
+    std::shared_ptr<VertexBuffer> m_vbo;
+    std::shared_ptr<IndexBuffer>  m_ib;
     std::shared_ptr<Shader>       m_shader;
 
     glm::mat4 m_model_mtx;
