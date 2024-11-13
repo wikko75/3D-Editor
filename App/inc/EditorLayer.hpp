@@ -50,6 +50,7 @@ private:
 
     std::pair<int, int> m_viewport_size;
     std::pair<float, float> m_viewport_mouse_pos;
+    glm::vec3 m_viewport_mouse_pos_model;
     bool m_viewport_active = false;
     
     EditMode m_edit_mode {EditMode::NONE};
