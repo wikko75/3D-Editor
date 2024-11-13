@@ -6,7 +6,7 @@
 #include "Shader.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
+#include <algorithm>
 
 
 class Mesh
@@ -76,9 +76,58 @@ public:
         m_selected_vertices[index] = true;
     }
 
-    auto getSelectedVertices() -> std::vector<bool>&
+    auto selectVertexAtPosition(glm::vec3 position) -> void
     {
-        return m_selected_vertices;
+        Logger::LOG("Selected Vertex: " + std::to_string(position.x) + ", " + std::to_string(position.y) + ", " +
+        std::to_string(position.z), Type::ERROR);
+
+        for (size_t i {0}; i < m_vertices.size(); ++i)
+        {
+            if (glm::distance(m_vertices[i].getPosition(), position) < 0.1)
+            {
+                Logger::LOG("SELECTED!", Type::ERROR);
+                m_selected_vertices[i] =  !m_selected_vertices[i];
+            }
+        }
+
+        fmt::print("Selected vertices: [{}]\n", fmt::join(m_selected_vertices, ","));
+
+    }
+
+
+    auto getSelectedVerticesCount() -> int
+    {
+        return std::count_if(m_selected_vertices.begin(), m_selected_vertices.end(), [](bool selected)
+        {
+            return selected == true;
+        });
+    }
+
+    auto updateSelectedVertices(const glm::vec3& offset) -> void
+    {
+        Logger::LOG("Position offset: [" + std::to_string(offset.x) + ", " + std::to_string(offset.y) + ", " + std::to_string(offset.z), Type::ERROR);
+        for (size_t i {0}; i < m_selected_vertices.size(); ++i)
+        {
+            if (m_selected_vertices[i])
+            {
+               updateVertexPosition(i, offset);
+            }
+        }
+
+        // update VertexBuffer with new data
+        m_vbo = std::make_shared<VertexBuffer>(m_vertices);
+        m_vao->addBuffer(m_vbo);
+
+    }
+
+
+    auto updateVertexPosition(int index, const glm::vec3& offset) -> void
+    {
+        auto position { m_vertices[index].getPosition() };
+        m_vertices[index].setPosition(position + offset);
+        //! debug only
+        position =  m_vertices[index].getPosition();
+        Logger::LOG("Updated Position: [" + std::to_string(position.x) + ", " + std::to_string(position.y) + ", " + std::to_string(position.z), Type::ERROR);
     }
 
     auto setRenderMode(GLenum render_mode) -> void

@@ -5,7 +5,6 @@
 #include "imgui_impl_opengl3.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-// #include "imgui_internal.h"
 #include "App.hpp"
 
 
@@ -76,14 +75,33 @@ void EditorLayer::onUpdate(float delta_time)
 
 void EditorLayer::onEvent(Event& event)
 {
-    Logger::LOG("Layer | EditorLayer |  onEvent()", Type::DEBUG);
+    // Logger::LOG("Layer | EditorLayer |  onEvent()", Type::DEBUG);
+    
+    EventDispacher dispatcher {event};
     
     if (m_viewport_active)
     {
         m_camera->onEvent(event);
+
+        if (m_edit_mode == EditMode::VERTEX)
+        {
+            dispatcher.dispatch<MouseButtonPressedEvent>([this](Event& event)
+            {   
+                Logger::LOG("Vertex Edit Mode |  MousePressed!", Type::WARNING);
+                MouseButtonPressedEvent& mouse_event {static_cast<MouseButtonPressedEvent&>(event)};
+               
+                // left mouse button
+                if (mouse_event.getMouseButton() == GLFW_MOUSE_BUTTON_LEFT)
+                {   
+                   m_mesh->selectVertexAtPosition(m_viewport_mouse_pos_model);
+                }
+
+                return true;
+            });
+        }
+        
     }
 
-    EventDispacher dispatcher {event};
     dispatcher.dispatch<WindowResizeEvent>([](Event& event)
     {
         // auto& e {static_cast<WindowResizeEvent&>(event)};
@@ -169,6 +187,13 @@ void EditorLayer::onImGuiRender()
                 // ImGui::Text("Mouse position (NDC): (%.1f, %.1f, %.1f)", ndc_x, ndc_y, 2.0f * depth - 1.0f);
                 ImGui::Text("Mouse position (Model): (%.1f, %.1f, %.1f)", m_viewport_mouse_pos_model.x, m_viewport_mouse_pos_model.y, m_viewport_mouse_pos_model.z);
                 ImGui::Text("Depth: (%.3f)", depth);
+                
+                if (m_edit_mode == EditMode::VERTEX)
+                {
+                    ImGui::Separator();
+                    ImGui::Text("Selected Vertices: %d", m_mesh->getSelectedVerticesCount());
+                }
+
                 ImGui::End();
             }
         }
@@ -183,19 +208,20 @@ void EditorLayer::onImGuiRender()
 
     if(ImGui::Begin("Settings"))
     {
+        static const ImVec4 colors[3] = {
+            ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+            ImVec4(0.0f, 1.0f, 0.0f, 1.0f),
+            ImVec4(0.0f, 0.0f, 1.0f, 1.0f)
+        };
+
+        static const char* axis[3] = {
+            "X",
+            "Y",
+            "Z"
+        };
+
         if (ImGui::CollapsingHeader("Transform"))
         {
-            static const ImVec4 colors[3] = {
-                ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
-                ImVec4(0.0f, 1.0f, 0.0f, 1.0f),
-                ImVec4(0.0f, 0.0f, 1.0f, 1.0f)
-            };
-
-            static const char* axis[3] = {
-                "X",
-                "Y",
-                "Z"
-            };
             
             ImGui::SeparatorText("Translate");
             {
@@ -257,7 +283,27 @@ void EditorLayer::onImGuiRender()
                 selected_mode = 0;
                 m_edit_mode = EditMode::NONE;
             }
-            // Logger::LOG()
+
+
+            if (m_edit_mode == EditMode::VERTEX)
+            {
+                glm::vec3 offset = {0.0f, 0.0f, 0.0f};
+
+                ImGui::SeparatorText("Translate");
+                {
+                    for (int i {0}; i < 3; ++i)
+                    {
+                        ImGui::PushID(i);
+                        if(ImGui::DragFloat("##VertexPosition", &offset[i], 0.005f, 0.0f))
+                        {
+                            m_mesh->updateSelectedVertices(offset);
+                        }
+                        ImGui::SameLine(); ImGui::TextColored(colors[i], axis[i]);
+                        ImGui::PopID();
+                    }
+                }
+
+            }
         }
         ImGui::End();
     }

@@ -49,6 +49,11 @@ public:
         return m_normal;
     }
 
+    auto setPosition(glm::vec3 position) -> void
+    {
+        m_position = position;
+    }
+
     auto setNormal(glm::vec3 normal) -> void
     {
         m_normal = normal;
