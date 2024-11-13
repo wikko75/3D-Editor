@@ -46,23 +46,6 @@ public:
         return m_id;
     }
 
-    // auto destroy() noexcept -> void
-    // {
-    //     for (auto buffer : m_vertex_buffer) 
-    //     {
-    //         buffer->destroy();
-    //     }
-
-    //     for (auto buffer : m_index_buffer)
-    //     {
-    //         buffer->destroy();
-    //     }
-
-    //     glDeleteVertexArrays(1, &m_id);
-
-    //     fmt::println("Vertex array destroyed!");
-    // }
-
     ~VertexArray()
     {
 

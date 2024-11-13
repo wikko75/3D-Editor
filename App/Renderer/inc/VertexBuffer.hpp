@@ -43,17 +43,6 @@ public:
         return m_id;
     }
 
-    // auto destroy() noexcept -> void
-    // {
-    //     // if (!glIsBuffer(m_id))
-    //     // {
-    //     //     return;
-    //     // }
-
-    //     // glDeleteBuffers(1, &m_id);
-    //     // fmt::println("Vertex buffer destroyed!");
-    // }
-
     ~VertexBuffer()
     {
         glDeleteBuffers(1, &m_id);
