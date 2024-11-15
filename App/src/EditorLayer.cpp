@@ -58,12 +58,13 @@ void EditorLayer::onUpdate(float delta_time)
         m_renderer->clear({0.2, 0.2, 0.2, 1});   
 
         shader->setUniform3f("u_color", 1.0, 0.5, 0.2);
+        shader->setUniformi("u_primitive_type", 0);
         m_mesh->setRenderMode(GL_TRIANGLES);
         m_renderer->render(m_mesh);
         
         if (m_edit_mode == EditMode::VERTEX)
         {
-            shader->setUniform3f("u_color", 1.f, 0.f, 0.0);
+            shader->setUniformi("u_primitive_type", 1);
             m_mesh->setRenderMode(GL_POINTS);
             m_renderer->render(m_mesh);
         }
@@ -184,7 +185,6 @@ void EditorLayer::onImGuiRender()
                 ImGui::Separator();
                 ImGui::Text("Size: (%d,%d)", m_viewport_size.first, m_viewport_size.second);
                 ImGui::Text("Mouse position (Viewport): (%.1f,%.1f)", m_viewport_mouse_pos.first, m_viewport_mouse_pos.second);
-                // ImGui::Text("Mouse position (NDC): (%.1f, %.1f, %.1f)", ndc_x, ndc_y, 2.0f * depth - 1.0f);
                 ImGui::Text("Mouse position (Model): (%.1f, %.1f, %.1f)", m_viewport_mouse_pos_model.x, m_viewport_mouse_pos_model.y, m_viewport_mouse_pos_model.z);
                 ImGui::Text("Depth: (%.3f)", depth);
                 
@@ -301,6 +301,11 @@ void EditorLayer::onImGuiRender()
                         ImGui::SameLine(); ImGui::TextColored(colors[i], axis[i]);
                         ImGui::PopID();
                     }
+                }
+
+                if(ImGui::Button("Deselect All"))
+                {
+                    m_mesh->deselectAllVertices();
                 }
 
             }

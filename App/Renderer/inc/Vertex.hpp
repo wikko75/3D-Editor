@@ -8,15 +8,17 @@
 enum class OFFSET
 {
     POSITION,
-    NORMALS
+    NORMALS,
+    SELECTED,
 };
 
 class Vertex
 {
 public:
-    Vertex(glm::vec3 position, glm::vec3 normal = {0.0f, 0.0f, 0.0f})
+    Vertex(glm::vec3 position, glm::vec3 normal = {0.0f, 0.0f, 0.0f}, int selected = 0)
     : m_position {position}
     , m_normal   {normal}
+    , m_selected {selected}
     {}
 
     auto count() const noexcept -> unsigned int 
@@ -34,6 +36,11 @@ public:
         if (type == OFFSET::NORMALS)
         {
             return sizeof(m_position);
+        }
+
+        if (type == OFFSET::SELECTED)
+        {
+            return sizeof(m_position) + sizeof(m_normal); 
         }
 
         return 0;
@@ -58,11 +65,23 @@ public:
     {
         m_normal = normal;
     }
+    
+    auto isSelected() const -> int
+    {
+        return m_selected;
+    }
+
+    auto select(int state) -> void
+    {
+        Logger::LOG("State changed: " + std::to_string(state), Type::ERROR);    
+        m_selected = state;
+    }
 
     ~Vertex() = default;
 private:
     glm::vec3 m_position;
     glm::vec3 m_normal;
+    int m_selected;
 };
 
 #endif
