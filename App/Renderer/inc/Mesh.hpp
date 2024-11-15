@@ -71,10 +71,6 @@ public:
         m_model_mtx = glm::scale(m_model_mtx, m_transformation.scale);
     }
 
-    auto selectVertex(int index) -> void
-    {
-        m_selected_vertices[index] = true;
-    }
 
     auto selectVertexAtPosition(glm::vec3 position) -> void
     {
@@ -83,15 +79,40 @@ public:
 
         for (size_t i {0}; i < m_vertices.size(); ++i)
         {
-            if (glm::distance(m_vertices[i].getPosition(), position) < 0.1)
+            if (glm::distance(m_vertices[i].getPosition(), position) < 1.0)
             {
                 Logger::LOG("SELECTED!", Type::ERROR);
-                m_selected_vertices[i] =  !m_selected_vertices[i];
+                m_selected_vertices[i] = !m_selected_vertices[i];
+                m_vertices[i].select(static_cast<int>(m_selected_vertices[i]));
+                fmt::print("m_vertices[i] selected: {}\n",static_cast<int>(m_vertices[i].isSelected()));
             }
         }
 
         fmt::print("Selected vertices: [{}]\n", fmt::join(m_selected_vertices, ","));
 
+        for (auto& vertex : m_vertices)
+        {
+         fmt::print("Vertex is selected {}\n", vertex.isSelected());
+        }
+
+        // update buffer
+        m_vbo = std::make_shared<VertexBuffer>(m_vertices);
+        m_vao->addBuffer(m_vbo);
+
+    }
+
+    auto deselectAllVertices() -> void
+    {
+        m_selected_vertices = std::vector<bool>(m_vertices.size(), false);
+
+        for (auto& vertex : m_vertices)
+        {
+            vertex.select(0);
+        }
+
+        m_vbo = std::make_shared<VertexBuffer>(m_vertices);
+        m_vao->addBuffer(m_vbo);
+        
     }
 
 

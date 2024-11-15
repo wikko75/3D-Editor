@@ -36,6 +36,8 @@ public:
 
     auto setUniformMatrix3f(const char* name, const GLboolean transpose, const GLfloat *value) noexcept -> void;
 
+    auto setUniformi(const char* name, const int v) -> void;
+
     ~Shader();
 
 

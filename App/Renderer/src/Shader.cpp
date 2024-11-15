@@ -85,6 +85,16 @@ auto Shader::setUniformMatrix3f(const char* name, GLboolean transpose, const GLf
     glUniformMatrix3fv(m_uniform_location_map.at(name), 1, transpose, value);
 }
 
+auto Shader::setUniformi(const char *name, const int v) -> void
+{
+    if (m_uniform_location_map.find(name) == m_uniform_location_map.end())
+    {
+        m_uniform_location_map[name] = glGetUniformLocation(m_program, name);
+    }
+    
+    glUniform1i(m_uniform_location_map.at(name), v);
+}
+
 Shader::~Shader()
 {
     // glDeleteProgram(m_program);
