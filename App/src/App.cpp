@@ -39,7 +39,7 @@ auto App::run() -> void
     );
 
     // sample mesh
-    std::shared_ptr<Mesh> mesh { std::make_shared<Mesh>(vertices,  shader)};
+    std::shared_ptr<Mesh> mesh { std::make_shared<Mesh>(vertices, shader)};
 
     double prev_frame {glfwGetTime()};
     double curr_frame {};
