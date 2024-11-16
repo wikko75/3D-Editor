@@ -77,6 +77,16 @@ public:
         glDisable(GL_DEPTH_TEST);
         m_depth_test = false;
     }
+
+    auto enableWireframeMode() const -> void
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+
+    auto disableWireframeMode() const -> void
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
        
     ~Renderer() = default;
 

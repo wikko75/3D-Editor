@@ -386,6 +386,29 @@ auto EditorLayer::showMenuBar() -> void
             {
                 App::get()->onClose();
             }
+
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Settings"))
+        {
+            if (ImGui::BeginMenu("Renderer"))
+            {
+                static bool m_wire_frame_mode_enabled {false};
+                if (ImGui::MenuItem("Wireframe Mode",nullptr, &m_wire_frame_mode_enabled))
+                {
+                    if (m_wire_frame_mode_enabled)
+                    {
+                        m_renderer->enableWireframeMode();
+                    }
+                    else
+                    {
+                        m_renderer->disableWireframeMode();
+                    }
+                }
+
+                ImGui::EndMenu();
+            }
+
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
