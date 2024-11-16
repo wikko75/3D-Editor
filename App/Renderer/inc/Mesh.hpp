@@ -124,6 +124,28 @@ public:
         });
     }
 
+    auto getSelectedVertices() const -> std::vector<Vertex>
+    {
+        std::vector<Vertex> selected_vertices {};
+        selected_vertices.reserve(m_selected_vertices.size());
+
+        for (size_t i {0}; i < m_selected_vertices.size(); ++i)
+        {
+            if (m_selected_vertices[i])
+            {
+                selected_vertices.emplace_back(m_vertices[i]);
+                
+            }
+        }
+
+        // for (auto& vertex : selected_vertices)
+        // {
+        //  fmt::print("getSelectedVertices |  selected {}\n", vertex.getPosition().x);
+        // }
+
+        return selected_vertices;
+    }
+
     auto updateSelectedVertices(const glm::vec3& offset) -> void
     {
         Logger::LOG("Position offset: [" + std::to_string(offset.x) + ", " + std::to_string(offset.y) + ", " + std::to_string(offset.z), Type::ERROR);
@@ -149,6 +171,28 @@ public:
         //! debug only
         position =  m_vertices[index].getPosition();
         Logger::LOG("Updated Position: [" + std::to_string(position.x) + ", " + std::to_string(position.y) + ", " + std::to_string(position.z), Type::ERROR);
+    }
+
+    // adds new vertex in between two vertices
+    auto addVertex(const Vertex& v1, const Vertex& v2) -> void
+    {
+        fmt::print("V1 : {}, {}, {}", v1.getPosition().x, v1.getPosition().y, v1.getPosition().z);
+        fmt::print("V1 : {}, {}, {}", v2.getPosition().x, v2.getPosition().y, v2.getPosition().z);   
+
+
+        // calculate middle point in all axis
+
+        // get all vertices of v1 position
+
+        // get all vertices of v2 position
+
+        // form triangles between v1 new_vertex v2
+
+
+        deselectAllVertices();
+
+        // select newly created vertex
+
     }
 
     auto setRenderMode(GLenum render_mode) -> void
