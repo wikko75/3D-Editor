@@ -31,7 +31,7 @@ auto App::run() -> void
         Vertex{{0.7f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
     };
 
-    std::vector<unsigned int> indices {0, 1, 2};
+    // std::vector<unsigned int> indices {0, 1, 2};
 
     auto shader = std::make_shared<Shader>(
             std::filesystem::current_path() / "App"  / "assets" / "shaders" / "basic_vertex.glsl",
@@ -39,7 +39,7 @@ auto App::run() -> void
     );
 
     // sample mesh
-    std::shared_ptr<Mesh> mesh { std::make_shared<Mesh>(vertices, indices, shader)};
+    std::shared_ptr<Mesh> mesh { std::make_shared<Mesh>(vertices,  shader)};
 
     double prev_frame {glfwGetTime()};
     double curr_frame {};
