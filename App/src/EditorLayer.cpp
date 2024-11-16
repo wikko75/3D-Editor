@@ -311,7 +311,7 @@ void EditorLayer::onImGuiRender()
 
                 if (ImGui::CollapsingHeader("Add"))
                 {
-                    ImGui::TextWrapped("To add a vertex, chooose 2 vertices of a mesh. The new vertex will be created in between the two selected vertices");
+                    ImGui::TextWrapped("To add a vertex, choose 2 vertices of a mesh. The new vertex will be created in between the two selected vertices");
 
                     static bool s_select_vertices = false;
                     static bool s_can_add = false;

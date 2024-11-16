@@ -156,22 +156,25 @@ public:
     {
         // since we might have many vertices in the same point in space
         // we wanna count such cases as `one` occurance 
-        std::unordered_set<glm::vec3, Vec3Hash> selected_vertex_positions {};
+        std::unordered_set<glm::vec3, Vec3Hash> selected_vertices_positions {};
 
         for (size_t i {0}; i < m_selected_vertices.size(); ++i)
         {
             if (!m_selected_vertices[i])
                 continue;
 
-            selected_vertex_positions.insert(m_vertices[i].getPosition());
+            selected_vertices_positions.insert(m_vertices[i].getPosition());
             
         }
 
-        return selected_vertex_positions.size();
+        return selected_vertices_positions.size();
     }
 
     auto getSelectedVertices() const -> std::vector<Vertex>
     {
+        //  to store only unique vertices (since there might be many in one point in space)
+        std::unordered_set<glm::vec3, Vec3Hash> selected_vertices_positions {};
+
         std::vector<Vertex> selected_vertices {};
         selected_vertices.reserve(m_selected_vertices.size());
 
@@ -179,8 +182,11 @@ public:
         {
             if (m_selected_vertices[i])
             {
+                if (selected_vertices_positions.contains(m_vertices[i].getPosition()))
+                    continue;
+
                 selected_vertices.emplace_back(m_vertices[i]);
-                
+                selected_vertices_positions.insert(m_vertices[i].getPosition());
             }
         }
 
@@ -240,7 +246,7 @@ public:
 
 
         auto vertices_at_v2_position {getVerticesAtPosition(v2_position)};
-        fmt::print("Vertices at v1 position:\n");
+        fmt::print("Vertices at v2 position:\n");
         for (const auto& v : vertices_at_v2_position)
         {
             fmt::print("[{}, {}, {}]\n", v.getPosition().x, v.getPosition().y, v.getPosition().z);
@@ -248,7 +254,7 @@ public:
 
         Vertex new_vertex {new_vertex_position};
 
-        // form triangles between al vertices at v1 position, new_vertex and v2 position
+        // form triangles between all vertices at v1 position, new_vertex and v2 position
         for (const auto& first : vertices_at_v1_position)
         {
             for (const auto& second : vertices_at_v2_position)
