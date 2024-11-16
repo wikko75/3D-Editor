@@ -289,7 +289,7 @@ void EditorLayer::onImGuiRender()
             {
                 glm::vec3 offset = {0.0f, 0.0f, 0.0f};
 
-                ImGui::SeparatorText("Translate");
+                if(ImGui::CollapsingHeader("Translate"))
                 {
                     for (int i {0}; i < 3; ++i)
                     {
@@ -301,12 +301,73 @@ void EditorLayer::onImGuiRender()
                         ImGui::SameLine(); ImGui::TextColored(colors[i], axis[i]);
                         ImGui::PopID();
                     }
+
+                    if (ImGui::Button("Deselect All"))
+                    {
+                        m_mesh->deselectAllVertices();
+                    }
                 }
 
-                if(ImGui::Button("Deselect All"))
+
+                if (ImGui::CollapsingHeader("Add"))
                 {
-                    m_mesh->deselectAllVertices();
+                    ImGui::TextWrapped("To add a vertex, chooose 2 vertices of a mesh. The new vertex will be created in between the two selected vertices");
+
+                    static bool s_select_vertices = false;
+                    static bool s_can_add = false;
+                    ImGui::Checkbox("Select Vertices", &s_select_vertices);
+                    if (s_select_vertices)
+                    {
+                        if (ImGui::BeginTable("Selected Vertices", 1, ImGuiTableFlags_Borders))
+                        {
+                            ImGui::TableNextColumn();
+                            ImGui::Text("Vertex Position");
+
+                            if (m_mesh->getSelectedVerticesCount() > 2)
+                            {
+                                ImGui::Text("Only 2 vertices migh be selected!");
+                                s_can_add = false;
+                            }
+                            else
+                            {
+                                for (const auto& vertex : m_mesh->getSelectedVertices())
+                                {
+                                    glm::vec3 position {vertex.getPosition()};
+                                    ImGui::TableNextColumn();
+                                    ImGui::Text("(%.3f, %.3f, %.3f)", position.x, position.y, position.z);
+                                }
+
+                                if (m_mesh->getSelectedVerticesCount() == 2)
+                                {
+                                    s_can_add = true;
+                                }
+                                else
+                                {
+                                    s_can_add = false;
+                                }
+                            }
+
+                            ImGui::EndTable();
+                        }
+
+
+                        ImGui::BeginDisabled(!s_can_add);
+                        if (ImGui::Button("Add##vertex_button"))
+                        {
+                            const auto& v {m_mesh->getSelectedVertices()};
+                            m_mesh->addVertex(v[0], v[1]);
+                        }
+                        ImGui::EndDisabled();
+                        ImGui::SameLine();
+                        if (ImGui::Button("Deselect All##vertices_button"))
+                        {
+                            Logger::LOG("DISELECTING", Type::ERROR);
+                            m_mesh->deselectAllVertices();
+                        }
+                    }
+                    
                 }
+               
 
             }
         }
