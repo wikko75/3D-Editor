@@ -73,7 +73,6 @@ public:
 
     auto select(int state) -> void
     {
-        Logger::LOG("State changed: " + std::to_string(state), Type::ERROR);    
         m_selected = state;
     }
 
