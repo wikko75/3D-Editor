@@ -33,33 +33,18 @@ public:
     };
 
 
-    // auto render(const VertexArray& vao, const Shader& shader, DRAW_TYPE type, GLenum render_mode) const noexcept -> void {
-    //     shader.useShader();
-    //     vao.bind();
-
-    //     if (type == DRAW_TYPE::ARRAYS)
-    //     {
-    //         glDrawArrays(render_mode, 0, 3);
-    //     }
-    //     else if (type == DRAW_TYPE::INDICES)
-    //     {
-    //         glDrawElements(render_mode, 36, GL_UNSIGNED_INT, 0);
-    //     }
-    // }
-
     auto render(std::shared_ptr<Mesh>& mesh) -> void
     {
         mesh->getShader()->useShader();
         mesh->getVao()->bind();
 
+        if (mesh->getIndicesCount() == 0)
+        {
+            glDrawArrays(mesh->getRenderMode(), 0, mesh->getVerticesCount());
+            return;
+        }
         glDrawElements(mesh->getRenderMode(), mesh->getIndicesCount(), GL_UNSIGNED_INT, nullptr);
     }
-
-    auto render(std::unique_ptr<Mesh> mesh) const noexcept -> void
-    {
-        //
-    }
-
 
     auto clear(glm::vec4 clear_color = {1.0f, 1.0f, 1.0f, 1.0f}) const noexcept -> void {
 
