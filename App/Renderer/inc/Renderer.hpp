@@ -33,7 +33,7 @@ public:
     };
 
 
-    auto render(std::shared_ptr<Mesh>& mesh) -> void
+    auto render(const std::shared_ptr<Mesh>& mesh) const -> void
     {
         mesh->getShader()->useShader();
         mesh->getVao()->bind();
@@ -41,9 +41,11 @@ public:
         if (mesh->getIndicesCount() == 0)
         {
             glDrawArrays(mesh->getRenderMode(), 0, mesh->getVerticesCount());
-            return;
         }
-        glDrawElements(mesh->getRenderMode(), mesh->getIndicesCount(), GL_UNSIGNED_INT, nullptr);
+        else
+        {
+            glDrawElements(mesh->getRenderMode(), mesh->getIndicesCount(), GL_UNSIGNED_INT, nullptr);
+        }
     }
 
     auto clear(glm::vec4 clear_color = {1.0f, 1.0f, 1.0f, 1.0f}) const noexcept -> void {

@@ -18,7 +18,6 @@ public:
         
 
         const auto vertex {vertices[0]};
-        fmt::print("VB Is selected: {}\n", vertices[0].isSelected());
 
         // position
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)Vertex::getOffset(OFFSET::POSITION)); 
@@ -31,7 +30,12 @@ public:
         // selection state
         glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, sizeof(Vertex), (void*)Vertex::getOffset(OFFSET::SELECTED)); 
         glEnableVertexAttribArray(2);
+    }
 
+    auto update(const size_t start, const std::vector<Vertex>& vertices) -> void
+    {
+        bind();
+        glBufferSubData(GL_ARRAY_BUFFER, start, sizeof(Vertex) *  vertices.size(), (void*)vertices.data());
     }
 
     auto bind() const noexcept -> void 
