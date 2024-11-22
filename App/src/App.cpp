@@ -23,24 +23,7 @@ App::App()
 }
 
 auto App::run() -> void
-{
-    std::vector<Vertex> vertices
-    {   
-        Vertex{{-0.7f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-        Vertex{{ 0.0f, 0.8f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-        Vertex{{0.7f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-    };
-
-    // std::vector<unsigned int> indices {0, 1, 2};
-
-    auto shader = std::make_shared<Shader>(
-            std::filesystem::current_path() / "App"  / "assets" / "shaders" / "basic_vertex.glsl",
-            std::filesystem::current_path() / "App" / "assets" / "shaders" / "basic_fragment.glsl"
-    );
-
-    // sample mesh
-    std::shared_ptr<Mesh> mesh { std::make_shared<Mesh>(vertices, shader)};
-
+{   
     double prev_frame {glfwGetTime()};
     double curr_frame {};
     double delta_time {};
@@ -51,8 +34,6 @@ auto App::run() -> void
         delta_time = curr_frame - prev_frame;
         prev_frame = curr_frame; 
 
-        m_editor_layer->addMesh(mesh);
-        
         m_editor_layer->onUpdate(delta_time);
         
         // render UI
