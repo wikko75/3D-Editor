@@ -276,7 +276,7 @@ public:
         // update buffers
 
         m_vao->bind();
-        m_vbo->update(0, m_vertices);
+        m_vbo = std::make_shared<VertexBuffer>(m_vertices);
         m_vao->addBuffer(m_vbo);
     }
 
