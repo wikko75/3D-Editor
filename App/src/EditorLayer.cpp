@@ -16,6 +16,11 @@ EditorLayer::EditorLayer(Window* window, const std::string& name)
 
     m_camera = std::make_shared<Camera>(window->getWindow(), glm::vec3{0.0f, 0.0f, 3.0f});
     m_viewport_size = {window->getWidth(), window->getHeight()};
+
+    // temp
+    addSquare(0.5f);
+    // addSquare(0.3f);
+    // addSquare(0.2f);
 }
 
 
@@ -25,51 +30,98 @@ EditorLayer::EditorLayer(Window* window, const std::string& name)
 //     //calculate stuff related to camera
 // }
 
-
-auto EditorLayer::addDrawable(std::shared_ptr<VertexArray> vao, std::shared_ptr<Shader> shader) -> void  // change for mesh
+auto EditorLayer::addSquare(const float size) -> void
 {
-    m_renderer->submit({vao, shader});
+    if (size <= 0.1)
+        return;
+
+    const float halfSize = size / 2.0f;
+
+    std::vector<Vertex> vertices = {
+        {{-halfSize, -halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}},
+        {{ halfSize, -halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}},
+        {{ halfSize,  halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}},
+        {{ halfSize,  halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}},
+        {{-halfSize,  halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}},
+        {{-halfSize, -halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}},
+
+        {{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}},
+        {{ halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}},
+        {{ halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}},
+        {{ halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}},
+        {{-halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}},
+        {{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}},
+
+        {{-halfSize, -halfSize, -halfSize}, {-1.0f, 0.0f, 0.0f}},
+        {{-halfSize, -halfSize,  halfSize}, {-1.0f, 0.0f, 0.0f}},
+        {{-halfSize,  halfSize,  halfSize}, {-1.0f, 0.0f, 0.0f}},
+        {{-halfSize,  halfSize,  halfSize}, {-1.0f, 0.0f, 0.0f}},
+        {{-halfSize,  halfSize, -halfSize}, {-1.0f, 0.0f, 0.0f}},
+        {{-halfSize, -halfSize, -halfSize}, {-1.0f, 0.0f, 0.0f}},
+
+        {{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}},
+        {{ halfSize, -halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}},
+        {{ halfSize,  halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}},
+        {{ halfSize,  halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}},
+        {{ halfSize,  halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}},
+        {{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}},
+
+        {{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f, 0.0f}},
+        {{-halfSize,  halfSize,  halfSize}, {0.0f, 1.0f, 0.0f}},
+        {{ halfSize,  halfSize,  halfSize}, {0.0f, 1.0f, 0.0f}},
+        {{ halfSize,  halfSize,  halfSize}, {0.0f, 1.0f, 0.0f}},
+        {{ halfSize,  halfSize, -halfSize}, {0.0f, 1.0f, 0.0f}},
+        {{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f, 0.0f}},
+
+        {{-halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}},
+        {{-halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}},
+        {{ halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}},
+        {{ halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}},
+        {{ halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}},
+        {{-halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}},
+    };
+
+    auto shader = std::make_shared<Shader>(
+            std::filesystem::current_path() / "App"  / "assets" / "shaders" / "basic_vertex.glsl",
+            std::filesystem::current_path() / "App" / "assets" / "shaders" / "basic_fragment.glsl"
+    );
+
+    std::shared_ptr<Mesh> mesh { std::make_shared<Mesh>(vertices, shader)};
+    m_meshes.push_back(mesh);
 }
-
-
-auto EditorLayer::addMesh(std::shared_ptr<Mesh>& mesh) -> void
-{
-    m_mesh = mesh;
-}
-
 
 void EditorLayer::onUpdate(float delta_time)
 {
     m_camera->update(delta_time);
 
-    Logger::LOG("Layer | Renderer | onUpdate()", Type::DEBUG);
+    m_renderer->clear({0.2, 0.2, 0.2, 1});  
 
-    m_mesh->recalculateModelMatrix();
-    auto* shader { m_mesh->getShader() };
-    shader->setUniformMatrix4f("u_view_projection_mtx", false, glm::value_ptr(m_camera->getViewProjectionMatrix()));
-    shader->setUniformMatrix4f("u_model_mtx", false, glm::value_ptr(m_mesh->getModelMatrix()));
-    
-    m_renderer->clear({0.2, 0.2, 0.2, 1});   
-
-    // render to my framebuffer
     m_framebuffer->bind();
-    
     {
         m_renderer->clear({0.2, 0.2, 0.2, 1});   
-
-        shader->setUniform3f("u_color", 1.0, 0.5, 0.2);
-        shader->setUniformi("u_primitive_type", 0);
-        m_mesh->setRenderMode(GL_TRIANGLES);
-        m_renderer->render(m_mesh);
         
-        if (m_edit_mode == EditMode::VERTEX)
+        for (const auto& mesh : m_meshes)
         {
-            shader->setUniformi("u_primitive_type", 1);
-            m_mesh->setRenderMode(GL_POINTS);
-            m_renderer->render(m_mesh);
+            mesh->recalculateModelMatrix();
+            auto* shader { mesh->getShader() };
+            shader->setUniformMatrix4f("u_view_projection_mtx", false, glm::value_ptr(m_camera->getViewProjectionMatrix()));
+            shader->setUniformMatrix4f("u_model_mtx", false, glm::value_ptr(mesh->getModelMatrix()));
+
+            shader->setUniform3f("u_color", 1.0, 0.5, 0.2);
+            shader->setUniformi("u_primitive_type", 0);
+            mesh->setRenderMode(GL_TRIANGLES);
+            // Logger::LOG(" onUpdate in EL", Type::DEBUG);
+            m_renderer->render(mesh);
+            
+            if (m_edit_mode == EditMode::VERTEX && mesh == m_selected_mesh)
+            {
+                fmt::print("Selected: {}, Current: {}\n",fmt::ptr(m_selected_mesh.get()), fmt::ptr(mesh.get()));
+                shader->setUniformi("u_primitive_type", 1);
+                mesh->setRenderMode(GL_POINTS);
+                m_renderer->render(mesh);
+            }
         }
     }
-   
     m_framebuffer->unbind();
 }
 
@@ -84,7 +136,7 @@ void EditorLayer::onEvent(Event& event)
     {
         m_camera->onEvent(event);
 
-        if (m_edit_mode == EditMode::VERTEX)
+        if (m_selected_mesh && m_edit_mode == EditMode::VERTEX)
         {
             dispatcher.dispatch<MouseButtonPressedEvent>([this](Event& event)
             {   
@@ -94,11 +146,13 @@ void EditorLayer::onEvent(Event& event)
                 // left mouse button
                 if (mouse_event.getMouseButton() == GLFW_MOUSE_BUTTON_LEFT)
                 {   
-                   m_mesh->selectVertexAtPosition(m_viewport_mouse_pos_model);
+                   m_selected_mesh->selectVertexAtPosition(m_viewport_mouse_pos_model);
+                   fmt::print("Exited selectVertexAtPosition()\n");
                 }
 
                 return true;
             });
+
         }
         
     }
@@ -166,14 +220,6 @@ void EditorLayer::onImGuiRender()
             glReadPixels(m_viewport_mouse_pos.first, y_screen_pos - y_mouse_pos, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
             m_framebuffer->unbind();
 
-            glm::vec4 screen_pos_with_depth = glm::vec4(ndc_x, ndc_y, 2.0f * depth - 1.0f, 1.0f);
-            glm::vec4 world_pos_with_depth = glm::inverse(m_camera->getViewProjectionMatrix() * m_mesh->getModelMatrix()) * screen_pos_with_depth;
-            world_pos_with_depth /= world_pos_with_depth.w;
-
-            m_viewport_mouse_pos_model = {world_pos_with_depth.x, world_pos_with_depth.y, world_pos_with_depth.z};
-            
-            // Logger::LOG("DEPTH: " + std::to_string(depth), Type::ERROR);
-            
             // stats overlay
             ImGui::SetNextWindowBgAlpha(0.35f);
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
@@ -185,13 +231,23 @@ void EditorLayer::onImGuiRender()
                 ImGui::Separator();
                 ImGui::Text("Size: (%d,%d)", m_viewport_size.first, m_viewport_size.second);
                 ImGui::Text("Mouse position (Viewport): (%.1f,%.1f)", m_viewport_mouse_pos.first, m_viewport_mouse_pos.second);
-                ImGui::Text("Mouse position (Model): (%.1f, %.1f, %.1f)", m_viewport_mouse_pos_model.x, m_viewport_mouse_pos_model.y, m_viewport_mouse_pos_model.z);
+                
+                if (m_selected_mesh)
+                {
+                    glm::vec4 screen_pos_with_depth = glm::vec4(ndc_x, ndc_y, 2.0f * depth - 1.0f, 1.0f);
+                    glm::vec4 world_pos_with_depth = glm::inverse(m_camera->getViewProjectionMatrix() * m_selected_mesh->getModelMatrix()) * screen_pos_with_depth;
+                    world_pos_with_depth /= world_pos_with_depth.w;
+
+                    m_viewport_mouse_pos_model = {world_pos_with_depth.x, world_pos_with_depth.y, world_pos_with_depth.z};
+                    ImGui::Text("Mouse position (Model): (%.1f, %.1f, %.1f)", m_viewport_mouse_pos_model.x, m_viewport_mouse_pos_model.y, m_viewport_mouse_pos_model.z);
+                }
+                
                 ImGui::Text("Depth: (%.3f)", depth);
                 
-                if (m_edit_mode == EditMode::VERTEX)
+                if (m_edit_mode == EditMode::VERTEX && m_selected_mesh)
                 {
                     ImGui::Separator();
-                    ImGui::Text("Selected Vertices: %d", m_mesh->getSelectedVerticesCount());
+                    ImGui::Text("Selected Vertices: %d", m_selected_mesh->getSelectedVerticesCount());
                 }
 
                 ImGui::End();
@@ -203,6 +259,67 @@ void EditorLayer::onImGuiRender()
         }
 
         ImGui::End();   
+    }
+
+
+    if (ImGui::Begin("Meshes"))
+    {
+        //  add some separator
+        if (ImGui::CollapsingHeader("Cube"))
+        {
+            static float s_square_size {0.0f};
+
+            ImGui::InputFloat("Size:", &s_square_size, 0.1f);
+
+            if (ImGui::Button("create"))
+            {                
+                addSquare(s_square_size);
+            }
+        }
+
+        // if (ImGui::CollapsingHeader("Triangle"))
+        // {
+        //     static float s_triangle_size {0.0f};
+
+        //     ImGui::InputFloat("Size:", &s_triangle_size, 0.1f);
+
+        //     if (ImGui::Button("create"))
+        //     {                
+        //         // create square
+        //     }
+        // }
+        ImGui::Text("Meshes:");
+        ImGui::Columns(1);
+        static size_t selected_index {0};
+        for (size_t i = 0; i < m_meshes.size(); ++i) 
+        {
+            if (ImGui::Selectable(std::string("Mesh: ").append(std::to_string(i)).c_str(), selected_index == i)) 
+            {
+                selected_index = i;
+                fmt::print("Selected: {}\n", i);
+                
+                if (!m_meshes[i]) {
+                    fmt::print("Mesh at index {} is nullptr\n", i);
+                    continue;
+                }
+
+                if (m_meshes[i] == m_selected_mesh) 
+                {
+                    fmt::print("This mesh is already selected!\n");
+                }
+
+
+                // Debugowanie, czy m_selected_mesh jest poprawnie ustawiany
+                m_selected_mesh = m_meshes[i];
+                fmt::print("Current mesh pointer in SELECTABLE: {}\n", fmt::ptr(m_meshes[i].get()));
+
+                // Debugowanie, czy m_selected_mesh wskazuje na odpowiedni obiekt
+                fmt::print("Selected mesh pointer: {}\n", fmt::ptr(m_selected_mesh.get()));
+            }
+        }
+
+        
+        ImGui::End();
     }
 
 
@@ -220,15 +337,21 @@ void EditorLayer::onImGuiRender()
             "Z"
         };
 
+        static Mesh::Transformation s_transformation {};
+
+        if (m_selected_mesh)
+        {
+            s_transformation = m_selected_mesh->getTransform();
+        }
+
         if (ImGui::CollapsingHeader("Transform"))
         {
-            
             ImGui::SeparatorText("Translate");
             {
                 for (int i {0}; i < 3; ++i)
                 {
                     ImGui::PushID(i);
-                    ImGui::DragFloat("##position", &m_mesh->getTransform().position[i], 0.005f);
+                    ImGui::DragFloat("##position", &s_transformation.position[i], 0.005f);
                     ImGui::SameLine(); ImGui::TextColored(colors[i], axis[i]);
                     ImGui::PopID();
                 }
@@ -238,7 +361,7 @@ void EditorLayer::onImGuiRender()
                 for (int i {0}; i < 3; ++i)
                 {
                     ImGui::PushID(i);
-                    ImGui::DragFloat("##rotation", &m_mesh->getTransform().rotation[i], 5.f, -180.f, 180.f);
+                    ImGui::DragFloat("##rotation", &s_transformation.rotation[i], 5.f, -180.f, 180.f);
                     ImGui::SameLine(); ImGui::TextColored(colors[i], axis[i]);
                     ImGui::PopID();
                 }
@@ -249,7 +372,7 @@ void EditorLayer::onImGuiRender()
                 for (int i {0}; i < 3; ++i)
                 {
                     ImGui::PushID(i);
-                    ImGui::DragFloat("##scale", &m_mesh->getTransform().scale[i], 0.005f);
+                    ImGui::DragFloat("##scale", &s_transformation.scale[i], 0.005f);
                     ImGui::SameLine(); ImGui::TextColored(colors[i], axis[i]);
                     ImGui::PopID();
                 }
@@ -258,8 +381,14 @@ void EditorLayer::onImGuiRender()
             ImGui::Dummy({0.f, 5.f});
             if (ImGui::Button("Back to default"))
             {
-                m_mesh->getTransform() = Mesh::Transformation {};
+                s_transformation = Mesh::Transformation {};
             }
+        }
+
+        if (m_selected_mesh)
+        {
+            // ugly, needs refactor
+            m_selected_mesh->getTransform() = s_transformation;
         }
 
         static int selected_mode = 0;
@@ -296,7 +425,10 @@ void EditorLayer::onImGuiRender()
                         ImGui::PushID(i);
                         if(ImGui::DragFloat("##VertexPosition", &offset[i], 0.005f, 0.0f))
                         {
-                            m_mesh->updateSelectedVertices(offset);
+                            if (m_selected_mesh)
+                            {
+                                m_selected_mesh->updateSelectedVertices(offset);
+                            }
                         }
                         ImGui::SameLine(); ImGui::TextColored(colors[i], axis[i]);
                         ImGui::PopID();
@@ -304,40 +436,45 @@ void EditorLayer::onImGuiRender()
 
                     if (ImGui::Button("Deselect All"))
                     {
-                        m_mesh->deselectAllVertices();
+                        if (m_selected_mesh)
+                        {
+                            m_selected_mesh->deselectAllVertices();
+                        }
                     }
                 }
 
 
                 if (ImGui::CollapsingHeader("Add"))
                 {
-                    ImGui::TextWrapped("To add a vertex, choose 2 vertices of a mesh. The new vertex will be created in between the two selected vertices");
+                    ImGui::TextWrapped("To add a vertex, first select a mesh, then choose 2 vertices of a mesh. The new vertex will be created in between the two selected vertices");
 
                     static bool s_select_vertices = false;
                     static bool s_can_add = false;
+                    
                     ImGui::Checkbox("Select Vertices", &s_select_vertices);
-                    if (s_select_vertices)
+                    
+                    if (s_select_vertices && m_selected_mesh)
                     {
                         if (ImGui::BeginTable("Selected Vertices", 1, ImGuiTableFlags_Borders))
                         {
                             ImGui::TableNextColumn();
                             ImGui::Text("Vertex Position");
 
-                            if (m_mesh->getSelectedVerticesCount() > 2)
+                            if (m_selected_mesh->getSelectedVerticesCount() > 2)
                             {
                                 ImGui::Text("Only 2 vertices migh be selected!");
                                 s_can_add = false;
                             }
                             else
                             {
-                                for (const auto& vertex : m_mesh->getSelectedVertices())
+                                for (const auto& vertex : m_selected_mesh->getSelectedVertices())
                                 {
                                     glm::vec3 position {vertex.getPosition()};
                                     ImGui::TableNextColumn();
                                     ImGui::Text("(%.3f, %.3f, %.3f)", position.x, position.y, position.z);
                                 }
 
-                                if (m_mesh->getSelectedVerticesCount() == 2)
+                                if (m_selected_mesh->getSelectedVerticesCount() == 2)
                                 {
                                     s_can_add = true;
                                 }
@@ -354,18 +491,17 @@ void EditorLayer::onImGuiRender()
                         ImGui::BeginDisabled(!s_can_add);
                         if (ImGui::Button("Add##vertex_button"))
                         {
-                            const auto& v {m_mesh->getSelectedVertices()};
-                            m_mesh->addVertex(v[0], v[1]);
+                            const auto& v {m_selected_mesh->getSelectedVertices()};
+                            m_selected_mesh->addVertex(v[0], v[1]);
                         }
                         ImGui::EndDisabled();
                         ImGui::SameLine();
                         if (ImGui::Button("Deselect All##vertices_button"))
                         {
                             Logger::LOG("DISELECTING", Type::ERROR);
-                            m_mesh->deselectAllVertices();
+                            m_selected_mesh->deselectAllVertices();
                         }
                     }
-                    
                 }
                
 

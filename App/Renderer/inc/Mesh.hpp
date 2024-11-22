@@ -132,7 +132,8 @@ public:
         }
 
         // update buffer
-        m_vbo = std::make_shared<VertexBuffer>(m_vertices);
+        m_vao->bind();
+        m_vbo->update(0, m_vertices);
         m_vao->addBuffer(m_vbo);
 
     }
@@ -146,9 +147,9 @@ public:
             vertex.select(0);
         }
 
-        m_vbo = std::make_shared<VertexBuffer>(m_vertices);
+        m_vao->bind();
+        m_vbo->update(0, m_vertices);
         m_vao->addBuffer(m_vbo);
-        
     }
 
 
@@ -205,9 +206,9 @@ public:
         }
 
         // update VertexBuffer with new data
-        m_vbo = std::make_shared<VertexBuffer>(m_vertices);
+        m_vao->bind();
+        m_vbo->update(0, m_vertices);
         m_vao->addBuffer(m_vbo);
-
     }
 
 
@@ -273,7 +274,9 @@ public:
         selectVertexAtPosition(new_vertex_position);
 
         // update buffers
-        m_vbo = std::make_shared<VertexBuffer>(m_vertices);
+
+        m_vao->bind();
+        m_vbo->update(0, m_vertices);
         m_vao->addBuffer(m_vbo);
     }
 
