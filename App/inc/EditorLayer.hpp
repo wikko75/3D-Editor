@@ -27,10 +27,7 @@ public:
 
     // auto beginScene(std::shared_ptr<Camera> camera) -> void;
 
-    auto addDrawable(std::shared_ptr<VertexArray> vao, std::shared_ptr<Shader> shader) -> void;
-
-    auto addMesh(std::shared_ptr<Mesh>& mesh) -> void;
-
+auto addSquare(const float size, const glm::vec4& color = {8.0f, 8.0f, 8.0f, 1.0f}) -> void;
     void onUpdate(float delta_time) override;
 
     void onImGuiRender() override;
@@ -45,8 +42,9 @@ private:
 private:
     std::unique_ptr<Renderer> m_renderer;
     std::shared_ptr<Camera>   m_camera;
-    std::shared_ptr<Mesh>     m_mesh;
+    std::shared_ptr<Mesh>     m_selected_mesh;
     std::shared_ptr<FrameBuffer> m_framebuffer;
+    std::vector<std::shared_ptr<Mesh>> m_meshes;
 
     std::pair<int, int> m_viewport_size;
     std::pair<float, float> m_viewport_mouse_pos;
