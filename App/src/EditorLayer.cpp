@@ -18,7 +18,7 @@ EditorLayer::EditorLayer(Window* window, const std::string& name)
     m_viewport_size = {window->getWidth(), window->getHeight()};
 
     // temp
-    addSquare(0.5f);
+    // addSquare(0.5f);
     // addSquare(0.3f);
     // addSquare(0.2f);
 }
@@ -30,7 +30,7 @@ EditorLayer::EditorLayer(Window* window, const std::string& name)
 //     //calculate stuff related to camera
 // }
 
-auto EditorLayer::addSquare(const float size) -> void
+auto EditorLayer::addSquare(const float size, const glm::vec4& color) -> void
 {
     if (size <= 0.1)
         return;
@@ -38,47 +38,47 @@ auto EditorLayer::addSquare(const float size) -> void
     const float halfSize = size / 2.0f;
 
     std::vector<Vertex> vertices = {
-        {{-halfSize, -halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}},
-        {{ halfSize, -halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}},
-        {{ halfSize,  halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}},
-        {{ halfSize,  halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}},
-        {{-halfSize,  halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}},
-        {{-halfSize, -halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}},
+        {{-halfSize, -halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}, color},
+        {{ halfSize, -halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}, color},
+        {{ halfSize,  halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}, color},
+        {{ halfSize,  halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}, color},
+        {{-halfSize,  halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}, color},
+        {{-halfSize, -halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}, color},
 
-        {{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}},
-        {{ halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}},
-        {{ halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}},
-        {{ halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}},
-        {{-halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}},
-        {{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}},
+        {{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
+        {{ halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
+        {{ halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
+        {{ halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
+        {{-halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
+        {{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
 
-        {{-halfSize, -halfSize, -halfSize}, {-1.0f, 0.0f, 0.0f}},
-        {{-halfSize, -halfSize,  halfSize}, {-1.0f, 0.0f, 0.0f}},
-        {{-halfSize,  halfSize,  halfSize}, {-1.0f, 0.0f, 0.0f}},
-        {{-halfSize,  halfSize,  halfSize}, {-1.0f, 0.0f, 0.0f}},
-        {{-halfSize,  halfSize, -halfSize}, {-1.0f, 0.0f, 0.0f}},
-        {{-halfSize, -halfSize, -halfSize}, {-1.0f, 0.0f, 0.0f}},
+        {{-halfSize, -halfSize, -halfSize}, {-1.0f, 0.0f, 0.0f}, color},
+        {{-halfSize, -halfSize,  halfSize}, {-1.0f, 0.0f, 0.0f}, color},
+        {{-halfSize,  halfSize,  halfSize}, {-1.0f, 0.0f, 0.0f}, color},
+        {{-halfSize,  halfSize,  halfSize}, {-1.0f, 0.0f, 0.0f}, color},
+        {{-halfSize,  halfSize, -halfSize}, {-1.0f, 0.0f, 0.0f}, color},
+        {{-halfSize, -halfSize, -halfSize}, {-1.0f, 0.0f, 0.0f}, color},
 
-        {{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}},
-        {{ halfSize, -halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}},
-        {{ halfSize,  halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}},
-        {{ halfSize,  halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}},
-        {{ halfSize,  halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}},
-        {{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}},
+        {{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}, color},
+        {{ halfSize, -halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}, color},
+        {{ halfSize,  halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}, color},
+        {{ halfSize,  halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}, color},
+        {{ halfSize,  halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}, color},
+        {{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}, color},
 
-        {{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f, 0.0f}},
-        {{-halfSize,  halfSize,  halfSize}, {0.0f, 1.0f, 0.0f}},
-        {{ halfSize,  halfSize,  halfSize}, {0.0f, 1.0f, 0.0f}},
-        {{ halfSize,  halfSize,  halfSize}, {0.0f, 1.0f, 0.0f}},
-        {{ halfSize,  halfSize, -halfSize}, {0.0f, 1.0f, 0.0f}},
-        {{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f, 0.0f}},
+        {{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f, 0.0f}, color},
+        {{-halfSize,  halfSize,  halfSize}, {0.0f, 1.0f, 0.0f}, color},
+        {{ halfSize,  halfSize,  halfSize}, {0.0f, 1.0f, 0.0f}, color},
+        {{ halfSize,  halfSize,  halfSize}, {0.0f, 1.0f, 0.0f}, color},
+        {{ halfSize,  halfSize, -halfSize}, {0.0f, 1.0f, 0.0f}, color},
+        {{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f, 0.0f}, color},
 
-        {{-halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}},
-        {{-halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}},
-        {{ halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}},
-        {{ halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}},
-        {{ halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}},
-        {{-halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}},
+        {{-halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}, color},
+        {{-halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}, color},
+        {{ halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}, color},
+        {{ halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}, color},
+        {{ halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}, color},
+        {{-halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}, color},
     };
 
     auto shader = std::make_shared<Shader>(
@@ -268,13 +268,17 @@ void EditorLayer::onImGuiRender()
         if (ImGui::CollapsingHeader("Cube"))
         {
             static float s_square_size {0.0f};
+            static glm::vec4 s_argb_color {0.8f, 0.8f, 0.8, 1.0f};
 
-            ImGui::InputFloat("Size:", &s_square_size, 0.1f);
-
+            ImGui::InputFloat("Size", &s_square_size, 0.1f);
+            ImGui::Separator();
+            ImGui::ColorPicker4("Color", &s_argb_color.x, (ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_PickerHueWheel));
+            
             if (ImGui::Button("create"))
             {                
-                addSquare(s_square_size);
+                addSquare(s_square_size, s_argb_color);
             }
+
         }
 
         // if (ImGui::CollapsingHeader("Triangle"))

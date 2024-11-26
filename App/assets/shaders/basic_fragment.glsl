@@ -1,6 +1,7 @@
 #version 330 core
 
 flat in int is_selected;
+in vec4 color;
 
 out vec4 FragColor;
 
@@ -12,7 +13,7 @@ void main()
     // GL_TRIANGLES -> just color
     if (u_primitive_type == 0) 
     {
-        FragColor = vec4(u_color, 1.0);
+        FragColor = color;
         return;
     }
 

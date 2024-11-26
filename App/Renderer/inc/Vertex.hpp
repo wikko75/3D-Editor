@@ -3,21 +3,24 @@
 
 #include <fmt/core.h>
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 
 enum class OFFSET
 {
     POSITION,
     NORMALS,
+    COLOR,
     SELECTED,
 };
 
 class Vertex
 {
 public:
-    Vertex(glm::vec3 position, glm::vec3 normal = {0.0f, 0.0f, 0.0f}, int selected = 0)
+    Vertex(const glm::vec3& position, const glm::vec3& normal = {0.0f, 0.0f, 0.0f}, const glm::vec4& color = {8.0f, 8.0f, 8.0f, 1.0f}, int selected = 0)
     : m_position {position}
     , m_normal   {normal}
+    , m_color    {color} 
     , m_selected {selected}
     {}
 
@@ -38,9 +41,14 @@ public:
             return sizeof(m_position);
         }
 
-        if (type == OFFSET::SELECTED)
+        if (type == OFFSET::COLOR)
         {
             return sizeof(m_position) + sizeof(m_normal); 
+        }
+
+        if (type == OFFSET::SELECTED)
+        {
+            return sizeof(m_position) + sizeof(m_normal) + sizeof(m_color); 
         }
 
         return 0;
@@ -80,6 +88,7 @@ public:
 private:
     glm::vec3 m_position;
     glm::vec3 m_normal;
+    glm::vec4 m_color;
     int m_selected;
 };
 

@@ -27,9 +27,13 @@ public:
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)Vertex::getOffset(OFFSET::NORMALS)); 
         glEnableVertexAttribArray(1);
 
-        // selection state
-        glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, sizeof(Vertex), (void*)Vertex::getOffset(OFFSET::SELECTED)); 
+        //color
+        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)Vertex::getOffset(OFFSET::COLOR)); 
         glEnableVertexAttribArray(2);
+
+        // selection state
+        glVertexAttribPointer(3, 1, GL_INT, GL_FALSE, sizeof(Vertex), (void*)Vertex::getOffset(OFFSET::SELECTED)); 
+        glEnableVertexAttribArray(3);
     }
 
     auto update(const size_t start, const std::vector<Vertex>& vertices) -> void
