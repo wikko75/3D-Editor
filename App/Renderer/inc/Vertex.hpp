@@ -73,6 +73,11 @@ public:
     {
         m_normal = normal;
     }
+
+    auto setColor(const glm::vec4& color) -> void
+    {
+        m_color = color;
+    }
     
     auto isSelected() const -> int
     {

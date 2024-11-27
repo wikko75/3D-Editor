@@ -399,6 +399,7 @@ void EditorLayer::onImGuiRender()
 
         if (ImGui::CollapsingHeader("Edit"))
         {
+            ImGui::TextWrapped("To edit a mesh, first select it from Meshes panel");
             if (ImGui::RadioButton("Vertex Mode", selected_mode == 1))
             {
                 selected_mode = 1;
@@ -507,8 +508,24 @@ void EditorLayer::onImGuiRender()
                         }
                     }
                 }
-               
 
+                if (ImGui::CollapsingHeader("Color"))
+                {
+                    static glm::vec4 s_color {0.8f, 0.8f, 0.8f, 1.0f};
+                    ImGui::ColorPicker4("Color", &s_color.x, ImGuiColorEditFlags_DisplayRGB);
+                    fmt::print("New color: {}, {}, {}\n", s_color.x, s_color.y, s_color.z);
+
+                    ImGui::Dummy({0.0f, 1.0f});
+
+                    ImGui::TextWrapped("To change color of a vertex, first select at least one vertex");
+                    if (ImGui::Button("Change color"))
+                    {
+                        if (m_selected_mesh)
+                        {
+                            m_selected_mesh->updateSelectedVertices(s_color);
+                        }
+                    }
+                }
             }
         }
         ImGui::End();

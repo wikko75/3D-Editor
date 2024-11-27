@@ -194,6 +194,23 @@ public:
         return selected_vertices;
     }
 
+    auto updateSelectedVertices(const glm::vec4& color) -> void
+    {
+        Logger::LOG("New color: [" + std::to_string(color.x) + ", " + std::to_string(color.y) + ", " + std::to_string(color.z) + ", " + std::to_string(color.w), Type::ERROR);
+        for (size_t i {0}; i < m_selected_vertices.size(); ++i)
+        {
+            if (m_selected_vertices[i])
+            {
+               m_vertices[i].setColor(color);
+            }
+        }
+
+        // update VertexBuffer with new data
+        m_vao->bind();
+        m_vbo->update(0, m_vertices);
+        m_vao->addBuffer(m_vbo);
+    }
+
     auto updateSelectedVertices(const glm::vec3& offset) -> void
     {
         Logger::LOG("Position offset: [" + std::to_string(offset.x) + ", " + std::to_string(offset.y) + ", " + std::to_string(offset.z), Type::ERROR);
