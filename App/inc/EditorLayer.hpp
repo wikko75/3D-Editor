@@ -20,6 +20,14 @@ enum class EditMode
 };
 
 
+enum class DialogType
+{
+    LOADING,
+    SAVING
+};
+
+
+
 class  EditorLayer : public Layer
 {
 public:
@@ -27,7 +35,8 @@ public:
 
     // auto beginScene(std::shared_ptr<Camera> camera) -> void;
 
-auto addSquare(const float size, const glm::vec4& color = {8.0f, 8.0f, 8.0f, 1.0f}) -> void;
+    auto addSquare(const float size, const glm::vec4& color = {8.0f, 8.0f, 8.0f, 1.0f}) -> void;
+    
     void onUpdate(float delta_time) override;
 
     void onImGuiRender() override;
@@ -38,6 +47,8 @@ auto addSquare(const float size, const glm::vec4& color = {8.0f, 8.0f, 8.0f, 1.0
 
 private:
     auto showMenuBar() -> void;
+
+    auto openFileDialog(bool& show_saving_dialog,  const DialogType type) -> void;
 
 private:
     std::unique_ptr<Renderer> m_renderer;

@@ -73,6 +73,20 @@ message("Fetching fmt...")
 
 FetchContent_MakeAvailable(fmt)
 
+
+FetchContent_Declare(
+    ImGuiFileDialog
+    GIT_REPOSITORY https://github.com/aiekick/ImGuiFileDialog.git
+    GIT_TAG        v0.6.7
+    GIT_SHALLOW TRUE       
+
+)
+
+FetchContent_GetProperties(ImGuiFileDialog)
+if (NOT ImGuiFileDialog_POPULATED)
+  FetchContent_Populate(ImGuiFileDialog)
+endif()
+
 add_executable(${PROJECT_NAME})
 
 add_subdirectory(App)
