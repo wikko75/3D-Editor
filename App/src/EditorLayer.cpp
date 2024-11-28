@@ -5,6 +5,9 @@
 #include "imgui_impl_opengl3.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "ImGuiFileDialog.h"
+#include <filesystem>
+#include <fstream>
 #include "App.hpp"
 
 
@@ -182,7 +185,6 @@ void EditorLayer::onImGuiRender()
     showMenuBar();
     ImGui::ShowDemoWindow();
     
-
     if (ImGui::Begin("Viewport"))
     {
         float viewportSizeWidth  {ImGui::GetContentRegionAvail().x};
@@ -533,12 +535,55 @@ void EditorLayer::onImGuiRender()
 }
 
 
+
+auto EditorLayer::openFileDialog(bool& show_saving_dialog, const DialogType type) ->  void
+{
+    IGFD::FileDialogConfig config;
+    config.path = ".";
+    ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".ini", config);
+
+    if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) 
+    {
+        if (ImGuiFileDialog::Instance()->IsOk()) 
+        { 
+            const std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+
+            if (type == DialogType::SAVING)
+            {
+
+                fmt::print("Saving file: {}\n", filePathName);
+            }
+            else if (type == DialogType::LOADING)
+            {
+                fmt::print("Loading file: {}\n", filePathName);
+            }
+        }
+    
+        show_saving_dialog = false;
+        ImGuiFileDialog::Instance()->Close();
+    }
+}
+
 auto EditorLayer::showMenuBar() -> void
 {
+    static bool s_show_saving_dialog {false};
+    static DialogType s_dialog_type {DialogType::LOADING};
+
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File"))
         {
+            if (ImGui::MenuItem("Save..."))
+            {
+                s_show_saving_dialog = true;
+                s_dialog_type = DialogType::SAVING;
+                fmt::print("Saving...\n");
+            }
+            if (ImGui::MenuItem("Load..."))
+            {
+                s_show_saving_dialog = true;
+                s_dialog_type = DialogType::LOADING;
+            }
             if (ImGui::MenuItem("Exit"))
             {
                 App::get()->onClose();
@@ -567,6 +612,11 @@ auto EditorLayer::showMenuBar() -> void
             }
 
             ImGui::EndMenu();
+        }
+
+        if (s_show_saving_dialog)
+        {
+            openFileDialog(s_show_saving_dialog, s_dialog_type);
         }
         ImGui::EndMainMenuBar();
     }

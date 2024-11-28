@@ -23,9 +23,12 @@ target_sources(${PROJECT_NAME} PRIVATE
         ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.h
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.h
+        ${imguifiledialog_SOURCE_DIR}/ImGuiFileDialog.h
+        ${imguifiledialog_SOURCE_DIR}/ImGuiFileDialogConfig.h
+        ${imguifiledialog_SOURCE_DIR}/ImGuiFileDialog.cpp
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends inc)
+target_include_directories(${PROJECT_NAME} PRIVATE ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends ${imguifiledialog_SOURCE_DIR} inc)
 
 target_include_directories(${PROJECT_NAME} PRIVATE inc)
 
