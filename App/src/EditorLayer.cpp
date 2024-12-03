@@ -20,10 +20,7 @@ EditorLayer::EditorLayer(Window* window, const std::string& name)
     m_camera = std::make_shared<Camera>(window->getWindow(), glm::vec3{0.0f, 0.0f, 3.0f});
     m_viewport_size = {window->getWidth(), window->getHeight()};
 
-    // temp
-    // addSquare(0.5f);
-    // addSquare(0.3f);
-    // addSquare(0.2f);
+    m_meshes.reserve(10);
 }
 
 
@@ -324,6 +321,10 @@ void EditorLayer::onImGuiRender()
             }
         }
 
+        if (ImGui::Button("Deselect"))
+        {
+            m_selected_mesh = nullptr;
+        }
         
         ImGui::End();
     }
@@ -343,7 +344,7 @@ void EditorLayer::onImGuiRender()
             "Z"
         };
 
-        static Mesh::Transformation s_transformation {};
+        Mesh::Transformation s_transformation {};
 
         if (m_selected_mesh)
         {
@@ -393,8 +394,7 @@ void EditorLayer::onImGuiRender()
 
         if (m_selected_mesh)
         {
-            // ugly, needs refactor
-            m_selected_mesh->getTransform() = s_transformation;
+            m_selected_mesh->setTransform(s_transformation);
         }
 
         static int selected_mode = 0;

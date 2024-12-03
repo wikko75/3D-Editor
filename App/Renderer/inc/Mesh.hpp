@@ -77,9 +77,14 @@ public:
         m_shader = shader;
     }
 
-    auto getTransform() -> Transformation&
+    auto getTransform() -> Transformation
     {
         return m_transformation;
+    }
+
+    auto setTransform(Transformation& transformation)
+    {
+        m_transformation = transformation;
     }
 
     auto recalculateModelMatrix() -> void
