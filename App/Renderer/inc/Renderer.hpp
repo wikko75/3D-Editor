@@ -35,7 +35,7 @@ public:
 
     auto render(const std::shared_ptr<Mesh>& mesh) const -> void
     {
-        mesh->getShader()->useShader();
+        mesh->getShader()->bind();
         mesh->getVao()->bind();
 
         if (mesh->getIndicesCount() == 0)
