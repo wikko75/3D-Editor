@@ -37,7 +37,7 @@ Shader::Shader(const std::filesystem::path &vertexShaderPath, const std::filesys
     }
 }
 
-auto Shader::useShader() const noexcept -> void {
+auto Shader::bind() const noexcept -> void {
     glUseProgram(this->m_program);
 }
 

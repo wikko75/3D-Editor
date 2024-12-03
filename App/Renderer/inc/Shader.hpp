@@ -22,7 +22,7 @@ public:
 public:
     Shader(const std::filesystem::path& vertexShader, const std::filesystem::path& fragmentShader);
 
-    auto useShader() const noexcept -> void;
+    auto bind() const noexcept -> void;
 
     auto getProgram() const noexcept -> GLuint;
 
