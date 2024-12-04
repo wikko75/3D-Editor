@@ -24,6 +24,12 @@ public:
 
         glEnable(GL_PROGRAM_POINT_SIZE);
         enableDepthTest();
+
+        glEnable(GL_DEBUG_OUTPUT);
+        glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+            fmt::print("[OpenGL] {}\n", message);
+        }, nullptr);
+
     }
 
     enum class DRAW_TYPE
