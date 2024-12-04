@@ -103,7 +103,8 @@ void EditorLayer::onUpdate(float delta_time)
         for (const auto& mesh : m_meshes)
         {
             mesh->recalculateModelMatrix();
-            auto* shader { mesh->getShader() };
+            auto shader { mesh->getShader() };
+            shader->bind();
             shader->setUniformMatrix4f("u_view_projection_mtx", false, glm::value_ptr(m_camera->getViewProjectionMatrix()));
             shader->setUniformMatrix4f("u_model_mtx", false, glm::value_ptr(mesh->getModelMatrix()));
 
@@ -143,7 +144,6 @@ void EditorLayer::onEvent(Event& event)
                 Logger::LOG("Vertex Edit Mode |  MousePressed!", Type::WARNING);
                 MouseButtonPressedEvent& mouse_event {static_cast<MouseButtonPressedEvent&>(event)};
                
-                // left mouse button
                 if (mouse_event.getMouseButton() == GLFW_MOUSE_BUTTON_LEFT)
                 {   
                    m_selected_mesh->selectVertexAtPosition(m_viewport_mouse_pos_model);
@@ -154,7 +154,6 @@ void EditorLayer::onEvent(Event& event)
             });
 
         }
-        
     }
 
     dispatcher.dispatch<WindowResizeEvent>([](Event& event)
