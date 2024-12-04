@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 #include <unordered_set>
+#include <fstream>
 
 
 class Mesh
@@ -59,7 +60,6 @@ public:
         m_vao->addBuffer(m_ib);
 
         m_selected_vertices = std::vector<bool>(m_vertices.size(), false);
-        fmt::print("Selected vertices: [{}]\n", fmt::join(m_selected_vertices, ","));
     }
     
     auto setVertices(const std::vector<Vertex>& vertices)
@@ -335,6 +335,14 @@ public:
     auto getRenderMode() -> GLenum
     {
         return m_render_mode;
+    }
+
+    auto serialize(std::ofstream& file) const -> void
+    {
+        for (const auto& vertex : m_vertices)
+        {
+            file << vertex.toString();
+        }
     }
 
     ~Mesh() = default;
