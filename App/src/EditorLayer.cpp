@@ -20,15 +20,10 @@ EditorLayer::EditorLayer(Window* window, const std::string& name)
     m_camera = std::make_shared<Camera>(window->getWindow(), glm::vec3{0.0f, 0.0f, 3.0f});
     m_viewport_size = {window->getWidth(), window->getHeight()};
 
+    addPointLight();
+
     m_meshes.reserve(10);
 }
-
-
-// auto EditorLayer::beginScene(std::shared_ptr<Camera> camera) -> void
-// {
-//     m_camera = camera;
-//     //calculate stuff related to camera
-// }
 
 auto EditorLayer::addSquare(const float size, const glm::vec4& color) -> void
 {
@@ -90,28 +85,106 @@ auto EditorLayer::addSquare(const float size, const glm::vec4& color) -> void
     m_meshes.push_back(mesh);
 }
 
+auto EditorLayer::addPointLight(const glm::vec4 &color) -> void
+{
+    const float halfSize = 0.02f;
+
+    std::vector<Vertex> vertices = {
+        {{-halfSize, -halfSize,  halfSize},color},
+        {{ halfSize, -halfSize,  halfSize},color},
+        {{ halfSize,  halfSize,  halfSize},color},
+        {{ halfSize,  halfSize,  halfSize},color},
+        {{-halfSize,  halfSize,  halfSize},color},
+        {{-halfSize, -halfSize,  halfSize},color},
+
+        {{-halfSize, -halfSize, -halfSize}, color},
+        {{ halfSize, -halfSize, -halfSize}, color},
+        {{ halfSize,  halfSize, -halfSize}, color},
+        {{ halfSize,  halfSize, -halfSize}, color},
+        {{-halfSize,  halfSize, -halfSize}, color},
+        {{-halfSize, -halfSize, -halfSize}, color},
+
+        {{-halfSize, -halfSize, -halfSize}, color},
+        {{-halfSize, -halfSize,  halfSize}, color},
+        {{-halfSize,  halfSize,  halfSize}, color},
+        {{-halfSize,  halfSize,  halfSize}, color},
+        {{-halfSize,  halfSize, -halfSize}, color},
+        {{-halfSize, -halfSize, -halfSize}, color},
+
+        {{ halfSize, -halfSize, -halfSize},color},
+        {{ halfSize, -halfSize,  halfSize},color},
+        {{ halfSize,  halfSize,  halfSize},color},
+        {{ halfSize,  halfSize,  halfSize},color},
+        {{ halfSize,  halfSize, -halfSize},color},
+        {{ halfSize, -halfSize, -halfSize},color},
+
+        {{-halfSize,  halfSize, -halfSize},color},
+        {{-halfSize,  halfSize,  halfSize},color},
+        {{ halfSize,  halfSize,  halfSize},color},
+        {{ halfSize,  halfSize,  halfSize},color},
+        {{ halfSize,  halfSize, -halfSize},color},
+        {{-halfSize,  halfSize, -halfSize},color},
+
+        {{-halfSize, -halfSize, -halfSize}, color},
+        {{-halfSize, -halfSize,  halfSize}, color},
+        {{ halfSize, -halfSize,  halfSize}, color},
+        {{ halfSize, -halfSize,  halfSize}, color},
+        {{ halfSize, -halfSize, -halfSize}, color},
+        {{-halfSize, -halfSize, -halfSize}, color},
+    };
+
+    auto shader = std::make_shared<Shader>(
+            std::filesystem::current_path() / "App"  / "assets" / "shaders" / "light_vertex.glsl",
+            std::filesystem::current_path() / "App" / "assets" / "shaders" / "light_fragment.glsl"
+    );
+
+    m_light_mesh = std::make_shared<Mesh>(vertices, shader);
+
+    auto light_transform { Mesh::Transformation{{-1.f, 1.f, 1.5f}, {}, glm::vec3{1.f}} };
+    m_light_mesh->setTransform(light_transform);
+}
+
 void EditorLayer::onUpdate(float delta_time)
 {
     m_camera->update(delta_time);
+    const auto& view_mtx {m_camera->getViewMatrix()};
+    const auto& projection_mtx {m_camera->getProjectionMatrix()};
+
+    m_light_mesh->recalculateModelMatrix();
+    auto shader = m_light_mesh->getShader();
+    shader->bind();
+    shader->setUniformMatrix4f("u_view_projection_mtx", false, glm::value_ptr(m_camera->getViewProjectionMatrix()));
+    shader->setUniformMatrix4f("u_model_mtx", false, glm::value_ptr(m_light_mesh->getModelMatrix()));
+    auto light_pos { m_light_mesh->getTransform().position };
+
 
     m_renderer->clear({0.2, 0.2, 0.2, 1});  
 
     m_framebuffer->bind();
     {
         m_renderer->clear({0.2, 0.2, 0.2, 1});   
+
+        m_renderer->render(m_light_mesh);
         
         for (const auto& mesh : m_meshes)
         {
             mesh->recalculateModelMatrix();
+
             auto shader { mesh->getShader() };
             shader->bind();
-            shader->setUniformMatrix4f("u_view_projection_mtx", false, glm::value_ptr(m_camera->getViewProjectionMatrix()));
+            shader->setUniformMatrix4f("u_projection_mtx", false, glm::value_ptr(projection_mtx));
+            shader->setUniformMatrix4f("u_view_mtx", false, glm::value_ptr(view_mtx));
             shader->setUniformMatrix4f("u_model_mtx", false, glm::value_ptr(mesh->getModelMatrix()));
-
             shader->setUniform3f("u_color", 1.0, 0.5, 0.2);
             shader->setUniformi("u_primitive_type", 0);
             mesh->setRenderMode(GL_TRIANGLES);
-            // Logger::LOG(" onUpdate in EL", Type::DEBUG);
+            
+            // ================ light stuff ============
+            shader->setUniform3f("u_light_pos", light_pos.x, light_pos.y, light_pos.z);
+            glm::mat3 normalMtx { glm::transpose(glm::inverse(glm::mat3(view_mtx * mesh->getModelMatrix()))) }; //! view coor
+            shader->setUniformMatrix3f("u_normal_mtx", GL_FALSE, glm::value_ptr(normalMtx));
+            // =========================================
+
             m_renderer->render(mesh);
             
             if (m_edit_mode == EditMode::VERTEX && mesh == m_selected_mesh)
@@ -129,7 +202,6 @@ void EditorLayer::onUpdate(float delta_time)
 
 void EditorLayer::onEvent(Event& event)
 {
-    // Logger::LOG("Layer | EditorLayer |  onEvent()", Type::DEBUG);
     
     EventDispacher dispatcher {event};
     
@@ -311,11 +383,9 @@ void EditorLayer::onImGuiRender()
                 }
 
 
-                // Debugowanie, czy m_selected_mesh jest poprawnie ustawiany
                 m_selected_mesh = m_meshes[i];
                 fmt::print("Current mesh pointer in SELECTABLE: {}\n", fmt::ptr(m_meshes[i].get()));
 
-                // Debugowanie, czy m_selected_mesh wskazuje na odpowiedni obiekt
                 fmt::print("Selected mesh pointer: {}\n", fmt::ptr(m_selected_mesh.get()));
             }
         }
@@ -385,7 +455,7 @@ void EditorLayer::onImGuiRender()
             }
 
             ImGui::Dummy({0.f, 5.f});
-            if (ImGui::Button("Back to default"))
+            if (ImGui::Button("Reset"))
             {
                 s_transformation = Mesh::Transformation {};
             }
@@ -529,6 +599,29 @@ void EditorLayer::onImGuiRender()
                 }
             }
         }
+
+        static auto s_light_transform {m_light_mesh->getTransform()};
+
+        if (ImGui::CollapsingHeader("Lighting"))
+        {
+            ImGui::Text("Position");
+            for (int i {0}; i < 3; ++i)
+            {
+                ImGui::PushID(i);
+                ImGui::DragFloat("##light_position", &s_light_transform.position[i], 0.005f);
+                ImGui::SameLine(); ImGui::TextColored(colors[i], axis[i]);
+                ImGui::PopID();
+            }
+
+            if (ImGui::Button("Reset##light_transform"))
+            {
+                s_light_transform = Mesh::Transformation{{-1.f, 1.f, 1.5f}, {}, glm::vec3{1.f}};
+            }
+
+            m_light_mesh->setTransform(s_light_transform);
+        }
+
+
         ImGui::End();
     }
 }

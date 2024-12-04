@@ -33,9 +33,9 @@ class  EditorLayer : public Layer
 public:
     EditorLayer(Window* window, const std::string& name = "Renderer");
 
-    // auto beginScene(std::shared_ptr<Camera> camera) -> void;
-
     auto addSquare(const float size, const glm::vec4& color = {8.0f, 8.0f, 8.0f, 1.0f}) -> void;
+
+    auto addPointLight(const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}) -> void;
     
     void onUpdate(float delta_time) override;
 
@@ -60,6 +60,7 @@ private:
     std::shared_ptr<Mesh>     m_selected_mesh;
     std::shared_ptr<FrameBuffer> m_framebuffer;
     std::vector<std::shared_ptr<Mesh>> m_meshes;
+    std::shared_ptr<Mesh> m_light_mesh;
 
     std::pair<int, int> m_viewport_size;
     std::pair<float, float> m_viewport_mouse_pos;
