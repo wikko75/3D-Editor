@@ -64,6 +64,11 @@ public:
         return m_normal;
     }
 
+    auto getColor() const -> glm::vec4
+    {
+        return m_color;
+    }
+
     auto setPosition(glm::vec3 position) -> void
     {
         m_position = position;
