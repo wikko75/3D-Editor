@@ -282,6 +282,9 @@ public:
         {
             for (const auto& second : vertices_at_v2_position)
             {
+                // new vertex color = average of neighbors
+                new_vertex.setColor(first.getColor() + second.getColor() / glm::vec4{2.f});
+
                 m_vertices.emplace_back(first);
                 m_vertices.emplace_back(new_vertex);
                 m_vertices.emplace_back(second);
