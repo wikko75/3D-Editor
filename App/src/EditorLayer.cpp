@@ -251,7 +251,7 @@ void EditorLayer::onImGuiRender()
 {
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
     showMenuBar();
-    ImGui::ShowDemoWindow();
+    // ImGui::ShowDemoWindow();
     
     if (ImGui::Begin("Viewport"))
     {
@@ -334,7 +334,7 @@ void EditorLayer::onImGuiRender()
 
     if (ImGui::Begin("Meshes"))
     {
-        //  add some separator
+
         if (ImGui::CollapsingHeader("Cube"))
         {
             static float s_square_size {0.0f};
@@ -344,12 +344,17 @@ void EditorLayer::onImGuiRender()
             ImGui::Separator();
             ImGui::ColorPicker4("Color", &s_argb_color.x, (ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_PickerHueWheel));
             
+            ImGui::Dummy({0.f, 2.f});
+
             if (ImGui::Button("create"))
             {                
                 addSquare(s_square_size, s_argb_color);
             }
 
+            ImGui::Dummy({0.f, 2.f});
         }
+
+        ImGui::Separator();
 
         // if (ImGui::CollapsingHeader("Triangle"))
         // {
@@ -389,6 +394,8 @@ void EditorLayer::onImGuiRender()
                 fmt::print("Selected mesh pointer: {}\n", fmt::ptr(m_selected_mesh.get()));
             }
         }
+
+        ImGui::Dummy({0.f, 2.f});
 
         if (ImGui::Button("Deselect"))
         {
@@ -454,7 +461,7 @@ void EditorLayer::onImGuiRender()
                 }
             }
 
-            ImGui::Dummy({0.f, 5.f});
+            ImGui::Dummy({0.f, 2.f});
             if (ImGui::Button("Reset"))
             {
                 s_transformation = Mesh::Transformation {};
@@ -468,6 +475,7 @@ void EditorLayer::onImGuiRender()
 
         static int selected_mode = 0;
 
+        ImGui::Separator();
         if (ImGui::CollapsingHeader("Edit"))
         {
             ImGui::TextWrapped("To edit a mesh, first select it from Meshes panel");
@@ -601,10 +609,11 @@ void EditorLayer::onImGuiRender()
         }
 
         static auto s_light_transform {m_light_mesh->getTransform()};
-
+        ImGui::Separator();
         if (ImGui::CollapsingHeader("Lighting"))
         {
-            ImGui::Text("Position");
+            ImGui::SeparatorText("Position");
+
             for (int i {0}; i < 3; ++i)
             {
                 ImGui::PushID(i);
@@ -613,6 +622,7 @@ void EditorLayer::onImGuiRender()
                 ImGui::PopID();
             }
 
+            ImGui::Dummy({0.f, 2.f});
             if (ImGui::Button("Reset##light_transform"))
             {
                 s_light_transform = Mesh::Transformation{{-1.f, 1.f, 1.5f}, {}, glm::vec3{1.f}};
@@ -620,6 +630,7 @@ void EditorLayer::onImGuiRender()
 
             m_light_mesh->setTransform(s_light_transform);
         }
+        ImGui::Separator();
 
 
         ImGui::End();
