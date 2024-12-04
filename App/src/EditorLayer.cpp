@@ -551,16 +551,120 @@ auto EditorLayer::openFileDialog(bool& show_saving_dialog, const DialogType type
             {
 
                 fmt::print("Saving file: {}\n", filePathName);
+                saveEditState(filePathName);
             }
             else if (type == DialogType::LOADING)
             {
                 fmt::print("Loading file: {}\n", filePathName);
+                loadEditState(filePathName);
             }
         }
     
         show_saving_dialog = false;
         ImGuiFileDialog::Instance()->Close();
     }
+}
+
+auto EditorLayer::saveEditState(std::string_view path) const -> bool
+{
+    fmt::print("FFF {}\n", path.data());
+    std::ofstream file {path.data()};
+
+    if (!file)
+    {
+        Logger::LOG("Can't open file to save!", Type::ERROR);
+        return false;
+    }
+
+    int count {0};
+
+    for (const auto& mesh : m_meshes)
+    {
+        file << fmt::format("[MESH]\n");
+        mesh->serialize(file);
+    }
+    file << "\n";
+
+    return false;
+}
+
+auto EditorLayer::loadEditState(std::string_view path) -> bool
+{
+    std::fstream file {path.data(), std::ios::in};
+
+    if (!file)
+    {
+        Logger::LOG("Can't open file to load!", Type::ERROR);
+        return false;
+    }
+
+    std::stringstream ss;
+    std::string line {};
+
+    std::vector<Vertex> vertices;
+    vertices.reserve(50);
+
+    int data_kind {0};
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec4 color;
+    int is_selected;
+    
+    while (std::getline(file, line))
+    {
+        fmt::print("LINE: {}\n\n", line);
+        if (line == "[MESH]" || line == "")
+        {
+            fmt::print("READING NEW MESH\nVERTICES SIZE: {}\n", vertices.size());
+
+            if (vertices.size() != 0)
+            {
+                fmt::print("CREATING MESH\n");
+                auto shader = std::make_shared<Shader>(
+                    std::filesystem::current_path() / "App"  / "assets" / "shaders" / "basic_vertex.glsl",
+                    std::filesystem::current_path() / "App" / "assets" / "shaders" / "basic_fragment.glsl"
+                );
+
+                std::shared_ptr<Mesh> mesh { std::make_shared<Mesh>(vertices, shader)};
+                m_meshes.push_back(mesh);
+            }
+        }
+        else
+        {
+            ss.clear();
+            ss.str("");
+            ss << line;
+
+            switch (data_kind % 4)
+            {
+            case 0:
+                // read position data
+                ss >> position.x >> position.y >> position.z;
+                break;
+            case 1:
+                // read normal data
+                ss >> normal.x >> normal.y >> normal.z;
+                break;
+            case 2:
+                // read color
+                ss >> color.x >> color.y >> color.z >> color.w;
+                break;
+            case 3:
+                // read selection status;
+                ss >> is_selected;
+                // batch read, store data
+                vertices.emplace_back(position, normal, color, is_selected);
+                fmt::print("READ VERTEX\n{}\n", vertices.back().toString());
+                break;
+            default:
+                break;
+            }
+
+            ++data_kind;
+        }
+    }
+
+    return false;
 }
 
 auto EditorLayer::showMenuBar() -> void

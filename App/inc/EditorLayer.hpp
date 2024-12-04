@@ -50,6 +50,10 @@ private:
 
     auto openFileDialog(bool& show_saving_dialog,  const DialogType type) -> void;
 
+    auto saveEditState(std::string_view path) const-> bool;
+
+    auto loadEditState(std::string_view path) -> bool;
+
 private:
     std::unique_ptr<Renderer> m_renderer;
     std::shared_ptr<Camera>   m_camera;

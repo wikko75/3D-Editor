@@ -89,6 +89,16 @@ public:
         m_selected = state;
     }
 
+    auto toString() const -> std::string
+    {
+        return fmt::format("{:.3f} {:.3f} {:.3f}\n{:.3f} {:.3f} {:.3f}\n{:.3f} {:.3f} {:.3f} {:.3f}\n{:d}\n",
+         m_position.x, m_position.y, m_position.z,
+         m_normal.x,   m_normal.y,   m_normal.z,
+         m_color.x,    m_color.y,    m_color.z,  m_color.w,
+         m_selected
+        );
+    }
+
     ~Vertex() = default;
 private:
     glm::vec3 m_position;
