@@ -20,6 +20,8 @@ struct CameraSettings
     float yaw = -90.0f;
     float sensitivity = 0.5f;
     float speed = 3.f;
+    float near_plane = 0.1f;
+    float far_plane = 100.f;
     bool  active = false;
 };
 
