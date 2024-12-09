@@ -532,12 +532,9 @@ void EditorLayer::onImGuiRender()
                 {
                     ImGui::TextWrapped("To add a vertex, first select a mesh, then choose 2 vertices of a mesh. The new vertex will be created in between the two selected vertices");
 
-                    static bool s_select_vertices = false;
                     static bool s_can_add = false;
-                    
-                    ImGui::Checkbox("Select Vertices", &s_select_vertices);
-                    
-                    if (s_select_vertices && m_selected_mesh)
+                                        
+                    if (m_selected_mesh)
                     {
                         if (ImGui::BeginTable("Selected Vertices", 1, ImGuiTableFlags_Borders))
                         {
