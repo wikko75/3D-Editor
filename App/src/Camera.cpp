@@ -36,7 +36,7 @@ Camera::Camera(GLFWwindow* window, const glm::vec3& position, const CameraSettin
     m_view_mtx = glm::lookAt(m_position, m_position + m_direction, { 0.0f, 1.0f, 0.0f });
     m_projection_mtx = (m_settings.projection == PROJECTION::PERSPECTIVE)
                                 ? 
-                                glm::perspective(glm::radians(90.f), m_settings.aspect_ratio, 0.1f, 100.f)
+                                glm::perspective(glm::radians(90.f), m_settings.aspect_ratio, m_settings.near_plane, m_settings.far_plane)
                                 :  
                                 //not working yet
                                 (glm::mat4)glm::ortho(0.0f, static_cast<float>(window_width), 0.0f, static_cast<float>(window_height), 0.1f, 100.0f);
@@ -51,7 +51,7 @@ auto Camera::update(const float delta_time) noexcept -> void
     //  update projection - view matrix
     // TODO optimise
     m_view_mtx = glm::lookAt(m_position, m_position + m_direction, { 0.0f, 1.0f, 0.0f });
-    m_projection_mtx = glm::perspective(glm::radians(90.f), m_settings.aspect_ratio, 0.1f, 100.f);
+    m_projection_mtx = glm::perspective(glm::radians(90.f), m_settings.aspect_ratio, m_settings.near_plane, m_settings.far_plane);
 
     m_view_projection_matrix = m_projection_mtx * m_view_mtx;
 }
@@ -83,6 +83,10 @@ auto Camera::onEvent(Event &event) -> void
         {   
             m_settings.active = true;
         }
+        else if (mouse_event.getMouseButton() == 2)
+        {
+            m_settings.near_plane = 0.1f;
+        }
 
         return true;
     });
@@ -97,6 +101,16 @@ auto Camera::onEvent(Event &event) -> void
         {   
             m_settings.active = false;
         }
+
+        return true;
+    });
+
+    dispacher.dispatch<MouseScrolledEvent>([this](Event& event)
+    {
+        Logger::LOG("Camera MouseScroll!", Type::WARNING);
+        MouseScrolledEvent& mouse_event {static_cast<MouseScrolledEvent&>(event)};
+
+        m_settings.near_plane += mouse_event.getOffsetY() * 0.005;
 
         return true;
     });
