@@ -69,11 +69,6 @@ public:
         }
     }
 
-    auto submit(std::pair<std::shared_ptr<VertexArray>, std::shared_ptr<Shader>> drawable_data) -> void
-    {
-        m_drawable_list.emplace_back(drawable_data);
-    }
-
     auto enableDepthTest() -> void
     {
         glEnable(GL_DEPTH_TEST);
@@ -100,7 +95,6 @@ public:
 
 private:
     GLFWwindow* m_window;
-    std::vector<std::pair<std::shared_ptr<VertexArray>, std::shared_ptr<Shader>>> m_drawable_list;
     bool m_depth_test;
 };
 
