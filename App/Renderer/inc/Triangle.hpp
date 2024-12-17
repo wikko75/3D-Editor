@@ -6,9 +6,9 @@
 
 struct Triangle
 {
-    Vertex v0;
-    Vertex v1;
-    Vertex v2;
+    size_t v0;
+    size_t v1;
+    size_t v2;
 };
 
 
