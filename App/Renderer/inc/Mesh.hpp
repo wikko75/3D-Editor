@@ -34,12 +34,25 @@ public:
     {
         Logger::LOG("Mesh created!", Type::ERROR);
 
-        // createTriangles(m_vertices);
+        createTriangles();
+
+        Logger::LOG("Calculating normals...", Type::INFO);
+
+        for (auto& vertex : m_vertices)
+        {
+            fmt::print("Vertex normal [ {}, {}, {} ]\n", vertex.getNormal().x, vertex.getNormal().y, vertex.getNormal().z);
+        }
 
         m_vao = std::make_unique<VertexArray>();
         m_vbo = std::make_shared<VertexBuffer>(m_vertices);
 
         m_vao->addBuffer(m_vbo);
+        
+        calculateNormals();
+
+        // update buffer after normal calculation
+        m_vao->bind();
+        m_vbo->update(0, m_vertices);
 
         m_selected_vertices = std::vector<bool>(m_vertices.size(), false);
         fmt::print("Selected vertices: [{}]\n", fmt::join(m_selected_vertices, ","));
@@ -65,11 +78,13 @@ public:
         m_selected_vertices = std::vector<bool>(m_vertices.size(), false);
     }
 
-    auto createTriangles(const std::vector<Vertex>& vertices)
+    auto createTriangles() -> void
     {
-        //  for each v1, v2, v3 in vertices:
-        // construct triangle
-        // calculate triangle normal
+        for (size_t i {0}; i <= m_vertices.size() - 3; i += 3)
+        {
+            m_triangles.emplace_back(i, i + 1, i + 2);
+            printTriangleData(m_triangles.back());
+        }
     }
     
     auto setVertices(const std::vector<Vertex>& vertices)
@@ -115,32 +130,30 @@ public:
 
         glm::vec3 edge_1 {};
         glm::vec3 edge_2 {};
-
         glm::vec3 cross_product {};
+
         for (auto& [v0, v1, v2] : m_triangles)
         {
-            edge_1 = m_vertices[v0].getPosition() - m_vertices[v1].getPosition();
-            edge_2 = m_vertices[v2].getPosition() - m_vertices[v1].getPosition();
+            edge_1 = m_vertices[v1].getPosition() - m_vertices[v0].getPosition();
+            edge_2 = m_vertices[v2].getPosition() - m_vertices[v0].getPosition();
 
             cross_product = glm::cross(edge_1, edge_2);
 
-            m_vertices[v0].setNormal(m_vertices[v0].getNormal() + cross_product);
-            m_vertices[v1].setNormal(m_vertices[v1].getNormal() + cross_product);
-            m_vertices[v2].setNormal(m_vertices[v2].getNormal() + cross_product);
-        }
+            fmt::print("Triangle: v0={}, v1={}, v2={}\n", v0, v1, v2);
+            fmt::print("Edge1: [{}, {}, {}]\n", edge_1.x, edge_1.y, edge_1.z);
+            fmt::print("Edge2: [{}, {}, {}]\n", edge_2.x, edge_2.y, edge_2.z);
+            fmt::print("CrossProduct: [{}, {}, {}]\n", cross_product.x, cross_product.y, cross_product.z);
 
-        for (auto [v0, v1, v2] : m_triangles)
-        {
-            m_vertices[v0].setNormal(glm::normalize(m_vertices[v0].getNormal()));
-            m_vertices[v1].setNormal(glm::normalize(m_vertices[v1].getNormal()));
-            m_vertices[v2].setNormal(glm::normalize(m_vertices[v2].getNormal()));
+
+            m_vertices[v0].setNormal(glm::normalize(cross_product));
+            m_vertices[v1].setNormal(glm::normalize(cross_product));
+            m_vertices[v2].setNormal(glm::normalize(cross_product));
         }
 
         for (const auto& triangle : m_triangles)
         {
            printTriangleNormal(triangle);
         }
-
     }
 
     auto recalculateModelMatrix() -> void
@@ -283,6 +296,7 @@ public:
             }
         }
 
+        calculateNormals();
         // update VertexBuffer with new data
         m_vao->bind();
         m_vbo->update(0, m_vertices);
@@ -418,20 +432,20 @@ private:
         pos = m_vertices[v0].getPosition();
         nor = m_vertices[v0].getNormal();
         
-        fmt::print("P[{}, {}, {}]\n", pos.x, pos.y, pos.z);
-        fmt::print("N[{}, {}, {}]\n", nor.x, nor.y, nor.z);
+        fmt::print("P [{}, {}, {}]\n", pos.x, pos.y, pos.z);
+        fmt::print("N [{}, {}, {}]\n", nor.x, nor.y, nor.z);
 
         pos = m_vertices[v1].getPosition();
         nor = m_vertices[v1].getNormal();
 
-        fmt::print("P[{}, {}, {}]\n", pos.x, pos.y, pos.z);
-        fmt::print("N[{}, {}, {}]\n", nor.x, nor.y, nor.z);
+        fmt::print("P [{}, {}, {}]\n", pos.x, pos.y, pos.z);
+        fmt::print("N [{}, {}, {}]\n", nor.x, nor.y, nor.z);
 
         pos = m_vertices[v2].getPosition();
         nor = m_vertices[v2].getNormal();
 
-        fmt::print("P[{}, {}, {}]\n", pos.x, pos.y, pos.z);
-        fmt::print("N[{}, {}, {}]\n\n", nor.x, nor.y, nor.z);
+        fmt::print("P [{}, {}, {}]\n", pos.x, pos.y, pos.z);
+        fmt::print("N [{}, {}, {}]\n\n", nor.x, nor.y, nor.z);
     }
 
     auto printTriangleNormal(const Triangle& triangle) const noexcept -> void
