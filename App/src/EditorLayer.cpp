@@ -40,12 +40,12 @@ auto EditorLayer::addSquare(const float size, const glm::vec4& color) -> void
         {{-halfSize,  halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}, color},
         {{-halfSize, -halfSize,  halfSize}, {0.0f, 0.0f, 1.0f}, color},
 
-        {{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
         {{ halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
-        {{ halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
-        {{ halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
-        {{-halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
         {{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
+        {{-halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
+        {{-halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
+        {{ halfSize,  halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
+        {{ halfSize, -halfSize, -halfSize}, {0.0f, 0.0f, -1.0f}, color},
 
         {{-halfSize, -halfSize, -halfSize}, {-1.0f, 0.0f, 0.0f}, color},
         {{-halfSize, -halfSize,  halfSize}, {-1.0f, 0.0f, 0.0f}, color},
@@ -54,12 +54,12 @@ auto EditorLayer::addSquare(const float size, const glm::vec4& color) -> void
         {{-halfSize,  halfSize, -halfSize}, {-1.0f, 0.0f, 0.0f}, color},
         {{-halfSize, -halfSize, -halfSize}, {-1.0f, 0.0f, 0.0f}, color},
 
-        {{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}, color},
         {{ halfSize, -halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}, color},
-        {{ halfSize,  halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}, color},
-        {{ halfSize,  halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}, color},
-        {{ halfSize,  halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}, color},
         {{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}, color},
+        {{ halfSize,  halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}, color},
+        {{ halfSize,  halfSize, -halfSize}, {1.0f, 0.0f, 0.0f}, color},
+        {{ halfSize,  halfSize,  halfSize}, {1.0f, 0.0f, 0.0f}, color},
+        {{ halfSize,  -halfSize, halfSize}, {1.0f, 0.0f, 0.0f}, color},
 
         {{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f, 0.0f}, color},
         {{-halfSize,  halfSize,  halfSize}, {0.0f, 1.0f, 0.0f}, color},
@@ -68,13 +68,31 @@ auto EditorLayer::addSquare(const float size, const glm::vec4& color) -> void
         {{ halfSize,  halfSize, -halfSize}, {0.0f, 1.0f, 0.0f}, color},
         {{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f, 0.0f}, color},
 
-        {{-halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}, color},
-        {{-halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}, color},
-        {{ halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}, color},
-        {{ halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}, color},
         {{ halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}, color},
+        {{ halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}, color},
+        {{-halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}, color},
+        {{-halfSize, -halfSize,  halfSize}, {0.0f, -1.0f, 0.0f}, color},
         {{-halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}, color},
+        {{ halfSize, -halfSize, -halfSize}, {0.0f, -1.0f, 0.0f}, color},
     };
+
+    auto shader = std::make_shared<Shader>(
+            std::filesystem::current_path() / "App"  / "assets" / "shaders" / "basic_vertex.glsl",
+            std::filesystem::current_path() / "App" / "assets" / "shaders" / "basic_fragment.glsl"
+    );
+
+    std::shared_ptr<Mesh> mesh { std::make_shared<Mesh>(vertices, shader)};
+    m_meshes.push_back(mesh);
+}
+
+auto EditorLayer::addTriangle() -> void
+{
+
+    std::vector<Vertex> vertices = {
+            Vertex({0.0f, 0.0f, 0.0f}),  
+            Vertex({1.0f, 0.0f, 0.0f}),
+            Vertex({0.0f, 1.0f, 0.0f})
+        };
 
     auto shader = std::make_shared<Shader>(
             std::filesystem::current_path() / "App"  / "assets" / "shaders" / "basic_vertex.glsl",
@@ -352,6 +370,15 @@ void EditorLayer::onImGuiRender()
             }
 
             ImGui::Dummy({0.f, 2.f});
+        }
+
+
+        if (ImGui::CollapsingHeader("Triangle"))
+        {
+            if (ImGui::Button("Create"))
+            {
+                addTriangle();
+            }
         }
 
         ImGui::Separator();

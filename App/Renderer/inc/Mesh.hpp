@@ -4,6 +4,7 @@
 #include "Logger.hpp"
 #include "VertexArray.hpp"
 #include "Shader.hpp"
+#include "Triangle.hpp"
 #include "utils.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -33,6 +34,8 @@ public:
     {
         Logger::LOG("Mesh created!", Type::ERROR);
 
+        // createTriangles(m_vertices);
+
         m_vao = std::make_unique<VertexArray>();
         m_vbo = std::make_shared<VertexBuffer>(m_vertices);
 
@@ -61,6 +64,13 @@ public:
 
         m_selected_vertices = std::vector<bool>(m_vertices.size(), false);
     }
+
+    auto createTriangles(const std::vector<Vertex>& vertices)
+    {
+        //  for each v1, v2, v3 in vertices:
+        // construct triangle
+        // calculate triangle normal
+    }
     
     auto setVertices(const std::vector<Vertex>& vertices)
     {
@@ -85,6 +95,52 @@ public:
     auto setTransform(Transformation& transformation)
     {
         m_transformation = transformation;
+    }
+
+
+    auto calculateNormals() -> void
+    {
+        
+        for (auto [v0, v1, v2] : m_triangles)
+        {
+            m_vertices[v0].setNormal(glm::vec3{0.0f, 0.0f, 0.0f});
+            m_vertices[v1].setNormal(glm::vec3{0.0f, 0.0f, 0.0f});
+            m_vertices[v2].setNormal(glm::vec3{0.0f, 0.0f, 0.0f});
+        }
+
+        for (const auto& triangle : m_triangles)
+        {
+           printTriangleNormal(triangle);
+        }
+
+        glm::vec3 edge_1 {};
+        glm::vec3 edge_2 {};
+
+        glm::vec3 cross_product {};
+        for (auto& [v0, v1, v2] : m_triangles)
+        {
+            edge_1 = m_vertices[v0].getPosition() - m_vertices[v1].getPosition();
+            edge_2 = m_vertices[v2].getPosition() - m_vertices[v1].getPosition();
+
+            cross_product = glm::cross(edge_1, edge_2);
+
+            m_vertices[v0].setNormal(m_vertices[v0].getNormal() + cross_product);
+            m_vertices[v1].setNormal(m_vertices[v1].getNormal() + cross_product);
+            m_vertices[v2].setNormal(m_vertices[v2].getNormal() + cross_product);
+        }
+
+        for (auto [v0, v1, v2] : m_triangles)
+        {
+            m_vertices[v0].setNormal(glm::normalize(m_vertices[v0].getNormal()));
+            m_vertices[v1].setNormal(glm::normalize(m_vertices[v1].getNormal()));
+            m_vertices[v2].setNormal(glm::normalize(m_vertices[v2].getNormal()));
+        }
+
+        for (const auto& triangle : m_triangles)
+        {
+           printTriangleNormal(triangle);
+        }
+
     }
 
     auto recalculateModelMatrix() -> void
@@ -131,10 +187,10 @@ public:
 
         fmt::print("Selected vertices: [{}]\n", fmt::join(m_selected_vertices, ","));
 
-        for (auto& vertex : m_vertices)
-        {
-         fmt::print("Vertex is selected {}\n", vertex.isSelected());
-        }
+        // for (auto& vertex : m_vertices)
+        // {
+        //  fmt::print("Vertex is selected {}\n", vertex.isSelected());
+        // }
 
         // update buffer
         m_vao->bind();
@@ -351,9 +407,56 @@ public:
     ~Mesh() = default;
 
 private:
+
+    auto printTriangleData(const Triangle& triangle) const noexcept -> void
+    {
+        glm::vec3 pos {};
+        glm::vec3 nor {};
+        
+        const auto& [v0, v1, v2] {triangle};
+
+        pos = m_vertices[v0].getPosition();
+        nor = m_vertices[v0].getNormal();
+        
+        fmt::print("P[{}, {}, {}]\n", pos.x, pos.y, pos.z);
+        fmt::print("N[{}, {}, {}]\n", nor.x, nor.y, nor.z);
+
+        pos = m_vertices[v1].getPosition();
+        nor = m_vertices[v1].getNormal();
+
+        fmt::print("P[{}, {}, {}]\n", pos.x, pos.y, pos.z);
+        fmt::print("N[{}, {}, {}]\n", nor.x, nor.y, nor.z);
+
+        pos = m_vertices[v2].getPosition();
+        nor = m_vertices[v2].getNormal();
+
+        fmt::print("P[{}, {}, {}]\n", pos.x, pos.y, pos.z);
+        fmt::print("N[{}, {}, {}]\n\n", nor.x, nor.y, nor.z);
+    }
+
+    auto printTriangleNormal(const Triangle& triangle) const noexcept -> void
+    {
+
+        const auto& [v0, v1, v2] {triangle};
+
+        glm::vec3 nor {m_vertices[v0].getNormal()};
+
+        fmt::print("N[{}, {}, {}]\n", nor.x, nor.y, nor.z);
+
+        nor = m_vertices[v1].getNormal();
+
+        fmt::print("N[{}, {}, {}]\n", nor.x, nor.y, nor.z);
+
+        nor = m_vertices[v2].getNormal();
+
+        fmt::print("N[{}, {}, {}]\n\n", nor.x, nor.y, nor.z);
+    }
+
+private:
     std::vector<Vertex>       m_vertices;
     std::vector<unsigned int> m_indices;
     std::vector<bool> m_selected_vertices;
+    std::vector<Triangle> m_triangles;
 
     std::unique_ptr<VertexArray>  m_vao;
     std::shared_ptr<VertexBuffer> m_vbo;
