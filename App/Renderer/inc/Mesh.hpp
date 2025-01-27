@@ -359,6 +359,8 @@ public:
                 m_vertices.emplace_back(new_vertex);
                 m_vertices.emplace_back(second);
 
+                m_triangles.push_back({ m_vertices.size() - 3, m_vertices.size() - 2, m_vertices.size() - 1 });
+
                 Logger::LOG("Added new triangle!", Type::INFO);
                 fmt::print("Position: [{}, {}, {}]\n", new_vertex_position.x, new_vertex_position.y, new_vertex_position.z);
             }
