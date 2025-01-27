@@ -1,6 +1,4 @@
 target_sources(${PROJECT_NAME} PRIVATE
-        src/init.cpp
-        inc/init.hpp
         inc/Camera.hpp
         src/Camera.cpp
         inc/Events.hpp

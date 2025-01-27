@@ -1,5 +1,6 @@
-#include "init.hpp"
+#include "App.hpp"
 
 int main() {
-    initApp();
+    std::unique_ptr<App> app {std::make_unique<App>()};
+    app->run();
 }
