@@ -52,6 +52,7 @@ public:
         {
             glDrawElements(mesh->getRenderMode(), mesh->getIndicesCount(), GL_UNSIGNED_INT, nullptr);
         }
+        mesh->getVao()->unbind();
     }
 
     auto clear(glm::vec4 clear_color = {1.0f, 1.0f, 1.0f, 1.0f}) const noexcept -> void {
