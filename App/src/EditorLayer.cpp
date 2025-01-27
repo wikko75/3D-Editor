@@ -85,24 +85,6 @@ auto EditorLayer::addSquare(const float size, const glm::vec4& color) -> void
     m_meshes.push_back(mesh);
 }
 
-auto EditorLayer::addTriangle() -> void
-{
-
-    std::vector<Vertex> vertices = {
-            Vertex({0.0f, 0.0f, 0.0f}),  
-            Vertex({1.0f, 0.0f, 0.0f}),
-            Vertex({0.0f, 1.0f, 0.0f})
-        };
-
-    auto shader = std::make_shared<Shader>(
-            std::filesystem::current_path() / "App"  / "assets" / "shaders" / "basic_vertex.glsl",
-            std::filesystem::current_path() / "App" / "assets" / "shaders" / "basic_fragment.glsl"
-    );
-
-    std::shared_ptr<Mesh> mesh { std::make_shared<Mesh>(vertices, shader)};
-    m_meshes.push_back(mesh);
-}
-
 auto EditorLayer::addPointLight(const glm::vec4 &color) -> void
 {
     const float halfSize = 0.02f;
@@ -207,7 +189,6 @@ void EditorLayer::onUpdate(float delta_time)
             
             if (m_edit_mode == EditMode::VERTEX && mesh == m_selected_mesh)
             {
-                fmt::print("Selected: {}, Current: {}\n",fmt::ptr(m_selected_mesh.get()), fmt::ptr(mesh.get()));
                 shader->setUniformi("u_primitive_type", 1);
                 mesh->setRenderMode(GL_POINTS);
                 m_renderer->render(mesh);
@@ -372,28 +353,8 @@ void EditorLayer::onImGuiRender()
             ImGui::Dummy({0.f, 2.f});
         }
 
-
-        if (ImGui::CollapsingHeader("Triangle"))
-        {
-            if (ImGui::Button("Create"))
-            {
-                addTriangle();
-            }
-        }
-
         ImGui::Separator();
 
-        // if (ImGui::CollapsingHeader("Triangle"))
-        // {
-        //     static float s_triangle_size {0.0f};
-
-        //     ImGui::InputFloat("Size:", &s_triangle_size, 0.1f);
-
-        //     if (ImGui::Button("create"))
-        //     {                
-        //         // create square
-        //     }
-        // }
         ImGui::Text("Meshes:");
         ImGui::Columns(1);
         static size_t selected_index {0};
@@ -402,7 +363,7 @@ void EditorLayer::onImGuiRender()
             if (ImGui::Selectable(std::string("Mesh: ").append(std::to_string(i)).c_str(), selected_index == i)) 
             {
                 selected_index = i;
-                fmt::print("Selected: {}\n", i);
+                // fmt::print("Selected: {}\n", i);
                 
                 if (!m_meshes[i]) {
                     fmt::print("Mesh at index {} is nullptr\n", i);
@@ -512,11 +473,11 @@ void EditorLayer::onImGuiRender()
                 m_edit_mode = EditMode::VERTEX;
             }
 
-            if (ImGui::RadioButton("Face Mode", selected_mode == 2))
-            {
-                selected_mode = 2;
-                m_edit_mode = EditMode::FACE;
-            }
+            // if (ImGui::RadioButton("Face Mode", selected_mode == 2))
+            // {
+            //     selected_mode = 2;
+            //     m_edit_mode = EditMode::FACE;
+            // }
 
             if(ImGui::RadioButton("None", selected_mode == 0))
             {

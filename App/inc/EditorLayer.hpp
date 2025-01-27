@@ -34,8 +34,6 @@ public:
     EditorLayer(Window* window, const std::string& name = "Renderer");
 
     auto addSquare(const float size, const glm::vec4& color = {8.0f, 8.0f, 8.0f, 1.0f}) -> void;
-
-    auto addTriangle() -> void;
     
     auto addPointLight(const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}) -> void;
     
