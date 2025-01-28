@@ -670,7 +670,9 @@ auto EditorLayer::saveEditState(std::string_view path) const -> bool
     for (const auto& mesh : m_meshes)
     {
         file << fmt::format("[MESH]\n");
-        mesh->serialize(file);
+        mesh->serialize(file, Mesh::SerializeType::MESH);
+        file << fmt::format("[TRANSFORM]\n");
+        mesh->serialize(file, Mesh::SerializeType::TRANSFORM);
     }
     file << "\n";
 
@@ -699,11 +701,19 @@ auto EditorLayer::loadEditState(std::string_view path) -> bool
     glm::vec4 color;
     int is_selected;
     
+    // temp
+    bool read_transform {false};
+    int transform_kind {0};
+    Mesh::Transformation transform {};
+    // 
+
     while (std::getline(file, line))
     {
         fmt::print("LINE: {}\n\n", line);
-        if (line == "[MESH]" || line == "")
+        if  (line == "[MESH]" || line == "")
         {
+            read_transform = false;
+
             fmt::print("READING NEW MESH\nVERTICES SIZE: {}\n", vertices.size());
 
             if (vertices.size() != 0)
@@ -715,8 +725,18 @@ auto EditorLayer::loadEditState(std::string_view path) -> bool
                 );
 
                 std::shared_ptr<Mesh> mesh { std::make_shared<Mesh>(vertices, shader)};
+                mesh->setTransform(transform);
                 m_meshes.push_back(mesh);
+
+                vertices.clear();
             }
+
+            data_kind = 0;
+        }
+        else if (line == "[TRANSFORM]")
+        {
+            read_transform = true;
+            transform_kind = 0;
         }
         else
         {
@@ -724,32 +744,59 @@ auto EditorLayer::loadEditState(std::string_view path) -> bool
             ss.str("");
             ss << line;
 
-            switch (data_kind % 4)
+            if (read_transform)
             {
-            case 0:
-                // read position data
-                ss >> position.x >> position.y >> position.z;
-                break;
-            case 1:
-                // read normal data
-                ss >> normal.x >> normal.y >> normal.z;
-                break;
-            case 2:
-                // read color
-                ss >> color.x >> color.y >> color.z >> color.w;
-                break;
-            case 3:
-                // read selection status;
-                ss >> is_selected;
-                // batch read, store data
-                vertices.emplace_back(position, normal, color, is_selected);
-                fmt::print("READ VERTEX\n{}\n", vertices.back().toString());
-                break;
-            default:
-                break;
-            }
+                switch (transform_kind % 3)
+                {
+                case 0:
+                    // read translation
+                    ss >> transform.position.x >> transform.position.y >> transform.position.z;
+                    break;
+                case 1:
+                    // read rotation
+                    ss >> transform.rotation.x >> transform.rotation.y >> transform.rotation.z;
+                    break;
+                case 2:
+                    // read scale
+                    ss >> transform.scale.x >> transform.scale.y >> transform.scale.z;
+                    read_transform = false;
+                    break;
+                default:
+                    break;
+                }
 
-            ++data_kind;
+                ++transform_kind;
+            }
+            else 
+            {
+                switch (data_kind % 4)
+                {
+                case 0:
+                    // read position data
+                    ss >> position.x >> position.y >> position.z;
+                    break;
+                case 1:
+                    // read normal data
+                    ss >> normal.x >> normal.y >> normal.z;
+                    break;
+                case 2:
+                    // read color
+                    ss >> color.x >> color.y >> color.z >> color.w;
+                    break;
+                case 3:
+                    // read selection status;
+                    ss >> is_selected;
+                    // batch read, store data
+                    vertices.emplace_back(position, normal, color, is_selected);
+                    fmt::print("READ VERTEX\n{}\n", vertices.back().toString());
+                    break;
+                default:
+                    break;
+                }
+
+                ++data_kind;
+            }
+           
         }
     }
 

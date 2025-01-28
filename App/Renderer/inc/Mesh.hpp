@@ -22,6 +22,15 @@ public:
         glm::vec3 position {0.0f, 0.0f, 0.0f};
         glm::vec3 rotation {0.0f, 0.0f, 0.0f};
         glm::vec3 scale    {1.0f, 1.0f, 1.0f};
+
+        auto toString() const -> std::string 
+        {
+            return fmt::format("{:.3f} {:.3f} {:.3f}\n{:.3f} {:.3f} {:.3f}\n{:.3f} {:.3f} {:.3f}\n",
+                position.x, position.y, position.z,
+                rotation.x, rotation.y, rotation.z,
+                scale.x,    scale.y,    scale.z
+            );
+        }
     };
 
 public:
@@ -412,11 +421,24 @@ public:
         return m_render_mode;
     }
 
-    auto serialize(std::ofstream& file) const -> void
+    enum class SerializeType
     {
-        for (const auto& vertex : m_vertices)
+        MESH,
+        TRANSFORM
+    };
+
+    auto serialize(std::ofstream& file, const SerializeType type) const -> void
+    {
+        if (type == SerializeType::MESH)
         {
-            file << vertex.toString();
+            for (const auto& vertex : m_vertices)
+            {
+                file << vertex.toString();
+            }
+        }
+        else if (type == SerializeType::TRANSFORM)
+        {   
+            file << m_transformation.toString();
         }
     }
 
